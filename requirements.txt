@@ -1,0 +1,33 @@
+# Core web framework
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.6
+websockets>=12.0
+
+# Audio processing
+numpy>=1.24.0
+librosa>=0.10.1
+soundfile>=0.12.1
+
+# ASR - faster-whisper (GPU accelerated)
+# Note: Install ctranslate2 first, then faster-whisper
+ctranslate2>=4.0.0
+faster-whisper>=1.0.0
+
+# Vision - MediaPipe
+mediapipe>=0.10.13
+opencv-python-headless>=4.9.0
+Pillow>=10.0.0
+
+# Optional: Ollama client for LLM tips
+httpx>=0.26.0
+
+# Utilities
+pydantic>=2.0.0
+
+# Session recording
+aiofiles>=23.2.1
+
+# Note: webrtcvad requires Visual C++ Build Tools on Windows
+# If installation fails, the app will work without it (VAD disabled)
+# pip install webrtcvad
