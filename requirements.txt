@@ -19,7 +19,26 @@ mediapipe>=0.10.13
 opencv-python-headless>=4.9.0
 Pillow>=10.0.0
 
-# Optional: Ollama client for LLM tips
+# ============================================================================
+# NEW: Emotion Detection Models (GPU accelerated)
+# ============================================================================
+
+# Transformers for text/face emotion
+transformers>=4.36.0
+torch>=2.1.0
+torchaudio>=2.1.0
+
+# SpeechBrain for audio emotion (wav2vec2-based)
+speechbrain>=1.0.0
+
+# Accelerate for faster inference
+accelerate>=0.25.0
+
+# ============================================================================
+# LLM Integration (Ollama)
+# ============================================================================
+
+# Ollama client
 httpx>=0.26.0
 
 # Utilities
@@ -31,3 +50,20 @@ aiofiles>=23.2.1
 # Note: webrtcvad requires Visual C++ Build Tools on Windows
 # If installation fails, the app will work without it (VAD disabled)
 # pip install webrtcvad
+
+# ============================================================================
+# GPU Setup Notes (RTX 4060)
+# ============================================================================
+# 
+# For CUDA support, install PyTorch with CUDA:
+#   pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121
+#
+# For Ollama (local LLM):
+#   1. Download from https://ollama.ai
+#   2. Run: ollama pull llama3.2
+#   3. Start: ollama serve
+#
+# Model downloads (first run):
+#   - SpeechBrain emotion model: ~300MB
+#   - GoEmotions text model: ~500MB
+#   - Faster-whisper ASR model: ~150MB (base)

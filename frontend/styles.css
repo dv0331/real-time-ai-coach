@@ -971,3 +971,335 @@ body {
         flex-direction: column;
     }
 }
+
+/* ============================================================================
+   Emotion Panel Styles (AI-Powered Emotion Detection)
+   ============================================================================ */
+
+.emotion-panel {
+    background: linear-gradient(135deg, var(--bg-card) 0%, #1e1e2e 100%);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    margin-top: var(--space-md);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.emotion-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.emotion-header .emotion-icon {
+    font-size: 1.3rem;
+}
+
+.emotion-header span:nth-child(2) {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.emotion-badge {
+    margin-left: auto;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.emotion-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
+}
+
+.emotion-card {
+    background: var(--bg-elevated);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.emotion-card:hover {
+    border-color: rgba(212, 175, 55, 0.3);
+    transform: translateY(-2px);
+}
+
+.emotion-card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-xs);
+}
+
+.emotion-card-header .card-icon {
+    font-size: 1rem;
+}
+
+.emotion-card-header .card-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.emotion-display {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+    text-transform: capitalize;
+}
+
+.emotion-display[data-emotion="happy"],
+.emotion-display[data-emotion="joy"],
+.emotion-display[data-emotion="excited"] {
+    color: #4ade80;
+}
+
+.emotion-display[data-emotion="sad"],
+.emotion-display[data-emotion="grief"] {
+    color: #60a5fa;
+}
+
+.emotion-display[data-emotion="angry"],
+.emotion-display[data-emotion="frustrated"] {
+    color: #f87171;
+}
+
+.emotion-display[data-emotion="fear"],
+.emotion-display[data-emotion="anxious"] {
+    color: #a78bfa;
+}
+
+.emotion-display[data-emotion="surprise"] {
+    color: #fbbf24;
+}
+
+.emotion-meter {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.emotion-meter .meter-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    min-width: 70px;
+}
+
+.emotion-meter .meter-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.emotion-meter .meter-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-gold-dark), var(--accent-gold));
+    width: 50%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+/* Voice emotion specific */
+.voice-emotion .meter-fill {
+    background: linear-gradient(90deg, #f87171, #fbbf24);
+}
+
+/* Face emotion specific */
+.face-emotion .meter-fill {
+    background: linear-gradient(90deg, #60a5fa, #4ade80);
+}
+
+/* Text emotion */
+.text-emotions-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: var(--space-xs);
+}
+
+.text-emotion-tag {
+    background: rgba(99, 102, 241, 0.2);
+    color: #a5b4fc;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.65rem;
+    font-weight: 500;
+}
+
+/* Intensity card */
+.intensity-card {
+    grid-column: span 2;
+}
+
+.intensity-display {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.intensity-bar-container {
+    flex: 1;
+    height: 12px;
+    background: linear-gradient(90deg, 
+        rgba(74, 222, 128, 0.3) 0%, 
+        rgba(251, 191, 36, 0.3) 50%, 
+        rgba(248, 113, 113, 0.3) 100%);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.emotion-intensity-bar {
+    height: 100%;
+    width: 50%;
+    background: linear-gradient(90deg, #4ade80, #fbbf24, #f87171);
+    border-radius: 6px;
+    transition: width 0.5s ease;
+}
+
+.emotion-intensity-bar.intensity-minimal {
+    width: 15%;
+    background: #4ade80;
+}
+
+.emotion-intensity-bar.intensity-low {
+    width: 35%;
+    background: linear-gradient(90deg, #4ade80, #fbbf24);
+}
+
+.emotion-intensity-bar.intensity-medium {
+    width: 60%;
+    background: linear-gradient(90deg, #4ade80, #fbbf24);
+}
+
+.emotion-intensity-bar.intensity-high {
+    width: 90%;
+    background: linear-gradient(90deg, #fbbf24, #f87171);
+}
+
+.intensity-display .intensity-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 80px;
+}
+
+/* ============================================================================
+   LLM Director's Notes Styles
+   ============================================================================ */
+
+.llm-tip {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-md);
+    margin-bottom: var(--space-sm);
+    animation: slideInFromTop 0.4s ease;
+}
+
+@keyframes slideInFromTop {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.llm-tip-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-xs);
+}
+
+.llm-tip-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #a78bfa;
+}
+
+.llm-tip-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.llm-tip-main {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+.llm-tip-strength {
+    font-size: 0.8rem;
+    color: #4ade80;
+}
+
+.llm-tip-strength .strength-label {
+    font-weight: 600;
+}
+
+.llm-tip-improve {
+    font-size: 0.8rem;
+    color: #fbbf24;
+}
+
+.llm-tip-improve .improve-label {
+    font-weight: 600;
+}
+
+.llm-tip-emotion {
+    font-size: 0.8rem;
+    color: #a78bfa;
+    font-style: italic;
+}
+
+/* LLM Badge in footer */
+.llm-badge {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+    border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.emotion-badge-footer {
+    background: linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(251, 191, 36, 0.2));
+    border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+/* Tip fade out animation */
+.tip.fade-out {
+    animation: fadeOut 0.3s ease forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}

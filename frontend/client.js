@@ -219,12 +219,13 @@ function handleMessage(message) {
             break;
             
         case 'llm_tip':
-            addTip({
-                id: 'director_' + Date.now(),
-                category: 'director',
-                message: data.message,
-                severity: 'info'
-            });
+            // Rich LLM coaching tip from Ollama
+            handleLLMTip(data);
+            break;
+            
+        case 'emotion':
+            // Real-time emotion analysis
+            updateEmotionDisplay(data);
             break;
             
         case 'summary':
@@ -234,6 +235,158 @@ function handleMessage(message) {
         default:
             console.log('Unknown message type:', type);
     }
+}
+
+// Handle structured LLM coaching tip
+function handleLLMTip(data) {
+    const tipElement = document.createElement('div');
+    tipElement.className = 'tip tip-director llm-tip';
+    tipElement.innerHTML = `
+        <div class="llm-tip-header">
+            <span class="tip-icon">🎬</span>
+            <span class="llm-tip-label">Director's Note</span>
+        </div>
+        <div class="llm-tip-content">
+            <div class="llm-tip-main">${data.tip || 'Keep going!'}</div>
+            ${data.strength ? `<div class="llm-tip-strength"><span class="strength-label">✓ Strength:</span> ${data.strength}</div>` : ''}
+            ${data.improve ? `<div class="llm-tip-improve"><span class="improve-label">→ Focus:</span> ${data.improve}</div>` : ''}
+            ${data.emotion_note ? `<div class="llm-tip-emotion"><span class="emotion-label">🎭</span> ${data.emotion_note}</div>` : ''}
+        </div>
+    `;
+    
+    // Add to tips list at top
+    const tipsList = elements.tipsList;
+    tipsList.insertBefore(tipElement, tipsList.firstChild);
+    
+    // Remove excess tips
+    while (tipsList.children.length > CONFIG.MAX_TIPS) {
+        tipsList.removeChild(tipsList.lastChild);
+    }
+    
+    // Auto-remove after timeout
+    setTimeout(() => {
+        if (tipElement.parentNode) {
+            tipElement.classList.add('fade-out');
+            setTimeout(() => tipElement.remove(), 300);
+        }
+    }, CONFIG.TIP_EXPIRE_MS * 1.5);  // Director notes stay longer
+}
+
+// Update emotion display in UI
+function updateEmotionDisplay(data) {
+    // Audio emotion
+    const audioEmotionEl = document.getElementById('audioEmotion');
+    const arousalBar = document.getElementById('arousalBar');
+    
+    if (audioEmotionEl && data.audio) {
+        const emotion = data.audio.emotion || 'neutral';
+        const arousal = data.audio.arousal || 0.5;
+        audioEmotionEl.textContent = `${getEmotionEmoji(emotion)} ${emotion}`;
+        audioEmotionEl.title = `Arousal: ${(arousal * 100).toFixed(0)}%`;
+        audioEmotionEl.dataset.emotion = emotion.toLowerCase();
+        
+        if (arousalBar) {
+            arousalBar.style.width = `${arousal * 100}%`;
+        }
+    }
+    
+    // Face emotion
+    const faceEmotionEl = document.getElementById('faceEmotion');
+    const expressivenessBar = document.getElementById('expressivenessBar');
+    
+    if (faceEmotionEl && data.face) {
+        const emotion = data.face.emotion || 'neutral';
+        const expressiveness = data.face.expressiveness || 0.5;
+        faceEmotionEl.textContent = `${getEmotionEmoji(emotion)} ${emotion}`;
+        faceEmotionEl.title = `Expressiveness: ${(expressiveness * 100).toFixed(0)}%`;
+        faceEmotionEl.dataset.emotion = emotion.toLowerCase();
+        
+        if (expressivenessBar) {
+            expressivenessBar.style.width = `${expressiveness * 100}%`;
+        }
+    }
+    
+    // Text sentiment
+    const textSentimentEl = document.getElementById('textSentiment');
+    const textEmotionsListEl = document.getElementById('textEmotionsList');
+    
+    if (textSentimentEl && data.text) {
+        const sentiment = data.text.sentiment || 'neutral';
+        textSentimentEl.textContent = `${getSentimentEmoji(sentiment)} ${sentiment}`;
+        
+        // Update emotion tags
+        if (textEmotionsListEl && data.text.emotions) {
+            textEmotionsListEl.innerHTML = data.text.emotions
+                .slice(0, 4)
+                .map(e => `<span class="text-emotion-tag">${e.label} (${(e.score * 100).toFixed(0)}%)</span>`)
+                .join('');
+        }
+    }
+    
+    // Overall intensity
+    const emotionIntensityEl = document.getElementById('emotionIntensity');
+    const intensityLabelEl = document.getElementById('intensityLabel');
+    
+    if (emotionIntensityEl && data.combined) {
+        const intensity = data.combined.intensity || 0.5;
+        emotionIntensityEl.style.width = `${intensity * 100}%`;
+        emotionIntensityEl.className = `emotion-intensity-bar ${getIntensityClass(intensity)}`;
+        
+        if (intensityLabelEl) {
+            intensityLabelEl.textContent = getIntensityLabel(intensity);
+        }
+    }
+    
+    // Update overall emotion state
+    state.currentEmotion = data;
+    
+    console.log('🎭 Emotion update:', data);
+}
+
+// Get sentiment emoji
+function getSentimentEmoji(sentiment) {
+    const emojis = {
+        'positive': '😊',
+        'negative': '😔',
+        'neutral': '😐'
+    };
+    return emojis[sentiment.toLowerCase()] || '😐';
+}
+
+// Get intensity label
+function getIntensityLabel(intensity) {
+    if (intensity > 0.75) return 'High';
+    if (intensity > 0.5) return 'Moderate';
+    if (intensity > 0.25) return 'Low';
+    return 'Minimal';
+}
+
+// Get emoji for emotion
+function getEmotionEmoji(emotion) {
+    const emojis = {
+        'neutral': '😐',
+        'happy': '😊',
+        'sad': '😢',
+        'angry': '😠',
+        'fear': '😨',
+        'disgust': '🤢',
+        'surprise': '😲',
+        'excited': '🤩',
+        'calm': '😌',
+        'joy': '😄',
+        'love': '🥰',
+        'anxious': '😰',
+        'frustrated': '😤'
+    };
+    return emojis[emotion.toLowerCase()] || '🎭';
+}
+
+// Get intensity class for styling
+function getIntensityClass(intensity) {
+    if (intensity > 0.75) return 'intensity-high';
+    if (intensity > 0.5) return 'intensity-medium';
+    if (intensity > 0.25) return 'intensity-low';
+    return 'intensity-minimal';
 }
 
 // ============================================================================

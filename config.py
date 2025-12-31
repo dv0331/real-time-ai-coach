@@ -96,11 +96,11 @@ class CoachConfig:
     TIP_COOLDOWN_SEC: float = 3.0     # Min seconds between same tip type
     MAX_TIPS_PER_UPDATE: int = 2      # Max tips to show at once
     
-    # Optional LLM settings
-    USE_LLM: bool = False             # Set True to use Ollama
+    # LLM settings (Ollama)
+    USE_LLM: bool = True              # Enable Ollama for rich coaching tips
     OLLAMA_URL: str = "http://localhost:11434"
-    OLLAMA_MODEL: str = "mistral"     # or llama2, phi, etc.
-    LLM_PROMPT_INTERVAL_SEC: float = 10.0  # How often to query LLM
+    OLLAMA_MODEL: str = "llama3.2"    # Fast model, good for real-time
+    LLM_PROMPT_INTERVAL_SEC: float = 8.0  # How often to query LLM
     
     # Tip priority (lower = higher priority)
     TIP_PRIORITIES: dict = field(default_factory=lambda: {
@@ -112,6 +112,28 @@ class CoachConfig:
         "monotone": 5,
         "presence": 6,
     })
+
+@dataclass
+class EmotionConfig:
+    """Emotion detection configuration."""
+    # Enable/disable emotion modalities
+    USE_AUDIO_EMOTION: bool = True    # SpeechBrain wav2vec2-IEMOCAP
+    USE_FACE_EMOTION: bool = False    # BEiT/ViT face emotion (slower)
+    USE_TEXT_EMOTION: bool = True     # GoEmotions text classifier
+    
+    # Analysis frequency
+    ANALYSIS_INTERVAL_SEC: float = 2.0  # Run emotion analysis every N seconds
+    
+    # Audio emotion settings
+    AUDIO_BUFFER_SEC: float = 4.0     # Audio window for emotion analysis
+    
+    # Model settings
+    AUDIO_MODEL: str = "speechbrain/emotion-recognition-wav2vec2-IEMOCAP"
+    TEXT_MODEL: str = "SamLowe/roberta-base-go_emotions"
+    FACE_MODEL: str = "trpakov/vit-face-expression"  # Lightweight
+    
+    # Device settings
+    DEVICE: str = "cuda"              # cuda or cpu
 
 @dataclass  
 class SessionConfig:
@@ -141,6 +163,7 @@ class Config:
     asr = ASRConfig()
     fusion = FusionConfig()
     coach = CoachConfig()
+    emotion = EmotionConfig()
     session = SessionConfig()
     server = ServerConfig()
 

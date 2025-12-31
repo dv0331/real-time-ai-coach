@@ -231,6 +231,72 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- Emotion Panel (NEW: AI Emotion Detection) -->
+                <div class="emotion-panel">
+                    <div class="emotion-header">
+                        <span class="emotion-icon">🎭</span>
+                        <span>Emotional Read</span>
+                        <span class="emotion-badge" id="emotionBadge">AI Powered</span>
+                    </div>
+                    <div class="emotion-grid">
+                        <!-- Voice Emotion -->
+                        <div class="emotion-card voice-emotion">
+                            <div class="emotion-card-header">
+                                <span class="card-icon">🎙️</span>
+                                <span class="card-title">Voice</span>
+                            </div>
+                            <div class="emotion-display" id="audioEmotion">😐 neutral</div>
+                            <div class="emotion-meter">
+                                <span class="meter-label">Arousal</span>
+                                <div class="meter-bar">
+                                    <div class="meter-fill" id="arousalBar"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Face Emotion -->
+                        <div class="emotion-card face-emotion">
+                            <div class="emotion-card-header">
+                                <span class="card-icon">👤</span>
+                                <span class="card-title">Expression</span>
+                            </div>
+                            <div class="emotion-display" id="faceEmotion">😐 neutral</div>
+                            <div class="emotion-meter">
+                                <span class="meter-label">Expressiveness</span>
+                                <div class="meter-bar">
+                                    <div class="meter-fill" id="expressivenessBar"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Text Sentiment -->
+                        <div class="emotion-card text-emotion">
+                            <div class="emotion-card-header">
+                                <span class="card-icon">📝</span>
+                                <span class="card-title">Script Intent</span>
+                            </div>
+                            <div class="emotion-display" id="textSentiment">— analyzing...</div>
+                            <div class="text-emotions-list" id="textEmotionsList">
+                                <!-- Dynamic emotion tags -->
+                            </div>
+                        </div>
+                        
+                        <!-- Overall Intensity -->
+                        <div class="emotion-card intensity-card">
+                            <div class="emotion-card-header">
+                                <span class="card-icon">⚡</span>
+                                <span class="card-title">Intensity</span>
+                            </div>
+                            <div class="intensity-display">
+                                <div class="intensity-bar-container">
+                                    <div class="emotion-intensity-bar" id="emotionIntensity"></div>
+                                </div>
+                                <span class="intensity-label" id="intensityLabel">Moderate</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Live Transcript -->
                 <div class="transcript-card">
@@ -256,6 +322,14 @@
                 <div class="tech-badge">
                     <span class="badge-icon">👁</span>
                     <span>MediaPipe</span>
+                </div>
+                <div class="tech-badge llm-badge">
+                    <span class="badge-icon">🦙</span>
+                    <span>Llama 3.2</span>
+                </div>
+                <div class="tech-badge emotion-badge">
+                    <span class="badge-icon">🎭</span>
+                    <span>SpeechBrain</span>
                 </div>
                 <div class="tech-badge">
                     <span class="badge-icon">⚡</span>

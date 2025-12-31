@@ -31,6 +31,21 @@ from fusion_engine import FusionEngine, FusedMetrics
 from coach_engine import CoachEngine, CoachingTip
 from session_recorder import SessionRecorder
 
+# New: Emotion and LLM modules
+try:
+    from emotion_engine import EmotionEngine, EmotionResult
+    HAS_EMOTION = True
+except ImportError:
+    HAS_EMOTION = False
+    logger.warning("Emotion engine not available")
+
+try:
+    from llm_coach import LLMCoach, LLMCoachingTip
+    HAS_LLM = True
+except ImportError:
+    HAS_LLM = False
+    logger.warning("LLM coach not available")
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -143,32 +158,64 @@ END-OF-SESSION SUMMARY:
 # These are loaded once to avoid slow initialization on each connection
 _global_asr: Optional[ASRPipeline] = None
 _global_vision: Optional[VisionPipeline] = None
+_global_emotion: Optional[Any] = None
+_global_llm: Optional[Any] = None
 _models_loaded = False
 
 def load_models():
     """Pre-load heavy models at startup."""
-    global _global_asr, _global_vision, _models_loaded
+    global _global_asr, _global_vision, _global_emotion, _global_llm, _models_loaded
     if _models_loaded:
         return
     
+    logger.info("=" * 50)
     logger.info("Loading AI models (this may take a moment)...")
+    logger.info("=" * 50)
     
+    # Vision pipeline
     try:
         _global_vision = VisionPipeline()
-        logger.info("Vision pipeline loaded")
+        logger.info("✓ Vision pipeline loaded")
     except Exception as e:
-        logger.warning(f"Vision pipeline failed: {e}")
+        logger.warning(f"✗ Vision pipeline failed: {e}")
         _global_vision = None
     
+    # ASR pipeline
     try:
         _global_asr = ASRPipeline()
-        logger.info("ASR pipeline loaded")
+        logger.info("✓ ASR pipeline loaded")
     except Exception as e:
-        logger.warning(f"ASR pipeline failed: {e}")
+        logger.warning(f"✗ ASR pipeline failed: {e}")
         _global_asr = None
     
+    # Emotion engine (optional)
+    if HAS_EMOTION:
+        try:
+            _global_emotion = EmotionEngine(
+                use_audio_emotion=config.emotion.USE_AUDIO_EMOTION if hasattr(config, 'emotion') else True,
+                use_face_emotion=config.emotion.USE_FACE_EMOTION if hasattr(config, 'emotion') else False,
+                use_text_emotion=config.emotion.USE_TEXT_EMOTION if hasattr(config, 'emotion') else True,
+                device="cuda"
+            )
+            logger.info("✓ Emotion engine initialized")
+        except Exception as e:
+            logger.warning(f"✗ Emotion engine failed: {e}")
+            _global_emotion = None
+    
+    # LLM coach (optional)
+    if HAS_LLM:
+        try:
+            model_name = config.coach.OLLAMA_MODEL if hasattr(config.coach, 'OLLAMA_MODEL') else "llama3.2"
+            _global_llm = LLMCoach(model=model_name)
+            logger.info(f"✓ LLM coach initialized (model: {model_name})")
+        except Exception as e:
+            logger.warning(f"✗ LLM coach failed: {e}")
+            _global_llm = None
+    
     _models_loaded = True
+    logger.info("=" * 50)
     logger.info("Model loading complete!")
+    logger.info("=" * 50)
 
 # ============================================================================
 # SESSION STATE
@@ -186,6 +233,23 @@ class SessionState:
         self.fusion = FusionEngine()
         self.coach = CoachEngine()
         self.recorder = SessionRecorder()
+        
+        # Emotion and LLM (shared global instances)
+        self.emotion = _global_emotion
+        self.llm_coach = _global_llm
+        
+        # Emotion state
+        self.latest_emotion: Optional[Any] = None
+        self.emotion_analysis_interval = 2.0  # Run emotion every 2 sec
+        self.last_emotion_time = 0
+        
+        # LLM state
+        self.llm_tip_interval = 8.0  # LLM tips every 8 sec
+        self.last_llm_time = 0
+        
+        # Audio buffer for emotion analysis
+        self.emotion_audio_buffer = []
+        self.emotion_audio_max_samples = 16000 * 4  # 4 seconds
         
         self.active = False
         self.start_time: float = 0
@@ -334,15 +398,30 @@ async def handle_message(websocket: WebSocket, session: SessionState, message: d
                     session.asr.add_audio(audio_bytes)
                 session.recorder.add_audio_chunk(audio_bytes)
                 
+                # Buffer audio for emotion analysis
+                if session.emotion:
+                    import numpy as np
+                    audio_np = np.frombuffer(audio_bytes, dtype=np.int16).astype(np.float32) / 32768.0
+                    session.emotion_audio_buffer.extend(audio_np.tolist())
+                    # Keep buffer limited
+                    if len(session.emotion_audio_buffer) > session.emotion_audio_max_samples:
+                        session.emotion_audio_buffer = session.emotion_audio_buffer[-session.emotion_audio_max_samples:]
+                
     elif msg_type == "video":
-        if session.active and session.vision:
+        if session.active:
             # Decode and process video
             video_b64 = message.get("data", "")
             if video_b64:
                 video_bytes = base64.b64decode(video_b64)
-                vision_result = session.vision.process_frame(video_bytes)
-                if vision_result:
-                    session.latest_vision = vision_result
+                
+                # Vision pipeline
+                if session.vision:
+                    vision_result = session.vision.process_frame(video_bytes)
+                    if vision_result:
+                        session.latest_vision = vision_result
+                
+                # Store for emotion analysis
+                session.latest_video_bytes = video_bytes
 
 async def handle_control(websocket: WebSocket, session: SessionState, message: dict):
     """Handle control messages (start/stop/reset)."""
@@ -372,8 +451,10 @@ async def handle_control(websocket: WebSocket, session: SessionState, message: d
 async def process_loop(websocket: WebSocket, session: SessionState):
     """
     Background processing loop.
-    Runs ASR, fusion, and coaching, then sends updates to client.
+    Runs ASR, emotion, fusion, and coaching, then sends updates to client.
     """
+    import numpy as np
+    
     while True:
         try:
             if session.active:
@@ -385,6 +466,33 @@ async def process_loop(websocket: WebSocket, session: SessionState):
                     if asr_result and asr_result.full_text:
                         session.latest_transcript = session.asr.get_transcript()
                         await send_transcript(websocket, asr_result)
+                
+                # Run emotion analysis periodically
+                if session.emotion and now - session.last_emotion_time >= session.emotion_analysis_interval:
+                    session.last_emotion_time = now
+                    
+                    try:
+                        # Get audio samples for emotion
+                        audio_samples = None
+                        if session.emotion_audio_buffer:
+                            audio_samples = np.array(session.emotion_audio_buffer, dtype=np.float32)
+                        
+                        # Get latest video frame
+                        video_bytes = getattr(session, 'latest_video_bytes', None)
+                        
+                        # Run combined emotion analysis
+                        emotion_result = session.emotion.get_combined_analysis(
+                            audio_samples=audio_samples,
+                            image_bytes=video_bytes,
+                            transcript=session.latest_transcript
+                        )
+                        session.latest_emotion = emotion_result
+                        
+                        # Send emotion update to client
+                        await send_emotion(websocket, emotion_result)
+                        
+                    except Exception as e:
+                        logger.debug(f"Emotion analysis error: {e}")
                 
                 # Update fusion and generate tips periodically
                 if now - session.last_metrics_time >= session.metrics_interval:
@@ -406,29 +514,46 @@ async def process_loop(websocket: WebSocket, session: SessionState):
                         "eye_contact": metrics.eye_contact_score
                     })
                     
-                    # Send metrics update
-                    await send_metrics(websocket, metrics)
+                    # Send metrics update (with emotion data if available)
+                    await send_metrics(websocket, metrics, session.latest_emotion)
                     
-                    # Generate coaching tips (less frequently)
+                    # Generate rule-based coaching tips
                     tips = session.coach.generate_tips(
                         metrics,
                         session.latest_transcript
                     )
                     if tips:
                         await send_tips(websocket, tips)
+                
+                # Generate LLM tip periodically (less frequent)
+                if session.llm_coach and now - session.last_llm_time >= session.llm_tip_interval:
+                    session.last_llm_time = now
                     
-                    # Try LLM tip if enabled
-                    if config.coach.USE_LLM:
-                        llm_tip = await session.coach.get_llm_tip(
-                            metrics,
-                            session.latest_transcript
+                    try:
+                        # Build signals for LLM
+                        signals = build_llm_signals(session)
+                        
+                        # Get LLM tip
+                        llm_tip = await session.llm_coach.generate_tip(
+                            signals=signals,
+                            transcript=session.latest_transcript,
+                            context="acting rehearsal"
                         )
+                        
                         if llm_tip:
                             await websocket.send_text(json.dumps({
                                 "type": "llm_tip",
-                                "data": {"message": llm_tip},
+                                "data": {
+                                    "tip": llm_tip.tip,
+                                    "strength": llm_tip.strength,
+                                    "improve": llm_tip.improve,
+                                    "emotion_note": llm_tip.emotion_note
+                                },
                                 "timestamp": time.time()
                             }))
+                            
+                    except Exception as e:
+                        logger.debug(f"LLM tip error: {e}")
             
             # Small sleep to prevent busy loop
             await asyncio.sleep(0.05)
@@ -438,6 +563,64 @@ async def process_loop(websocket: WebSocket, session: SessionState):
         except Exception as e:
             logger.error(f"Processing error: {e}")
             await asyncio.sleep(0.1)
+
+def build_llm_signals(session: SessionState) -> Dict[str, Any]:
+    """Build signals dict for LLM coach."""
+    signals = {}
+    
+    # Basic metrics
+    if session.latest_audio:
+        signals["pace_wpm"] = session.latest_audio.wpm
+        signals["energy_db"] = session.latest_audio.energy_db
+        signals["pitch_variety"] = session.latest_audio.pitch_variability
+    
+    if hasattr(session, 'latest_vision') and session.latest_vision:
+        signals["eye_contact"] = session.latest_vision.eye_contact_score
+        signals["presence"] = session.latest_vision.presence_score
+    
+    # Filler ratio
+    if session.audio.total_words > 0:
+        signals["filler_ratio"] = session.audio.filler_count / session.audio.total_words
+    
+    # Emotion data
+    if session.latest_emotion:
+        signals["audio_emotion"] = session.latest_emotion.audio_emotion
+        signals["audio_arousal"] = session.latest_emotion.audio_arousal
+        signals["face_emotion"] = session.latest_emotion.face_emotion
+        signals["face_expressiveness"] = session.latest_emotion.face_expressiveness
+        signals["text_sentiment"] = session.latest_emotion.text_sentiment
+        signals["text_emotions"] = session.latest_emotion.text_emotions
+        signals["emotion_intensity"] = session.latest_emotion.emotion_intensity
+        signals["emotional_range"] = session.latest_emotion.emotional_range
+    
+    return signals
+
+async def send_emotion(websocket: WebSocket, emotion: Any):
+    """Send emotion analysis update to client."""
+    await websocket.send_text(json.dumps({
+        "type": "emotion",
+        "data": {
+            "audio": {
+                "emotion": emotion.audio_emotion,
+                "arousal": round(emotion.audio_arousal, 2),
+                "valence": round(emotion.audio_valence, 2)
+            },
+            "face": {
+                "emotion": emotion.face_emotion,
+                "expressiveness": round(emotion.face_expressiveness, 2)
+            },
+            "text": {
+                "sentiment": emotion.text_sentiment,
+                "emotions": emotion.text_emotions[:3] if emotion.text_emotions else []
+            },
+            "combined": {
+                "intensity": round(emotion.emotion_intensity, 2),
+                "range": round(emotion.emotional_range, 2),
+                "authenticity": round(emotion.emotion_authenticity, 2)
+            }
+        },
+        "timestamp": time.time()
+    }))
 
 # ============================================================================
 # MESSAGE SENDERS
@@ -451,33 +634,46 @@ async def send_status(websocket: WebSocket, status: str, message: str):
         "timestamp": time.time()
     }))
 
-async def send_metrics(websocket: WebSocket, metrics: FusedMetrics):
+async def send_metrics(websocket: WebSocket, metrics: FusedMetrics, emotion: Optional[Any] = None):
     """Send metrics update to client."""
+    data = {
+        "scores": {
+            "overall": round(metrics.overall_score, 3),
+            "pace": round(metrics.pace_score, 3),
+            "energy": round(metrics.energy_score, 3),
+            "pitch_variety": round(metrics.pitch_variety_score, 3),
+            "filler_words": round(metrics.filler_word_score, 3),
+            "eye_contact": round(metrics.eye_contact_score, 3),
+            "presence": round(metrics.presence_score, 3),
+            "stability": round(metrics.stability_score, 3)
+        },
+        "raw": {
+            "wpm": round(metrics.wpm, 1),
+            "energy_db": round(metrics.energy_db, 1),
+            "filler_ratio": round(metrics.filler_ratio, 3)
+        },
+        "flags": {
+            "is_speaking": metrics.is_speaking,
+            "face_detected": metrics.face_detected,
+            "looking_at_camera": metrics.looking_at_camera
+        },
+        "trend": metrics.overall_trend
+    }
+    
+    # Add emotion data if available
+    if emotion:
+        data["emotion"] = {
+            "audio_emotion": emotion.audio_emotion,
+            "audio_arousal": round(emotion.audio_arousal, 2),
+            "face_emotion": emotion.face_emotion,
+            "face_expressiveness": round(emotion.face_expressiveness, 2),
+            "text_sentiment": emotion.text_sentiment,
+            "intensity": round(emotion.emotion_intensity, 2)
+        }
+    
     await websocket.send_text(json.dumps({
         "type": "metrics",
-        "data": {
-            "scores": {
-                "overall": round(metrics.overall_score, 3),
-                "pace": round(metrics.pace_score, 3),
-                "energy": round(metrics.energy_score, 3),
-                "pitch_variety": round(metrics.pitch_variety_score, 3),
-                "filler_words": round(metrics.filler_word_score, 3),
-                "eye_contact": round(metrics.eye_contact_score, 3),
-                "presence": round(metrics.presence_score, 3),
-                "stability": round(metrics.stability_score, 3)
-            },
-            "raw": {
-                "wpm": round(metrics.wpm, 1),
-                "energy_db": round(metrics.energy_db, 1),
-                "filler_ratio": round(metrics.filler_ratio, 3)
-            },
-            "flags": {
-                "is_speaking": metrics.is_speaking,
-                "face_detected": metrics.face_detected,
-                "looking_at_camera": metrics.looking_at_camera
-            },
-            "trend": metrics.overall_trend
-        },
+        "data": data,
         "timestamp": time.time()
     }))
 
