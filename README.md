@@ -64,9 +64,17 @@ Actors need to rehearse constantly, but:
                                                 │  └────────────────────────┘  │
                                                 │                              │
                                                 │  ┌────────────────────────┐  │
-                                                │  │   OPTIONAL: Local LLM  │  │
-                                                │  │   (Ollama/llama.cpp)   │  │
-                                                │  │   For richer feedback  │  │
+                                                │  │   EMOTION ENGINE (NEW) │  │
+                                                │  │   • SpeechBrain SER    │  │
+                                                │  │   • GoEmotions Text    │  │
+                                                │  │   • Face Expression    │  │
+                                                │  └────────────────────────┘  │
+                                                │                              │
+                                                │  ┌────────────────────────┐  │
+                                                │  │   LLM COACH (Ollama)   │  │
+                                                │  │   • Llama 3.2          │  │
+                                                │  │   • Director's Notes   │  │
+                                                │  │   • Rich Coaching Tips │  │
                                                 │  └────────────────────────┘  │
                                                 └──────────────────────────────┘
 ```
@@ -81,10 +89,13 @@ Actors need to rehearse constantly, but:
 - **Vocal Variety**: Avoid monotone delivery - track pitch variation
 - **Pauses**: Master dramatic beats and comedic timing
 
-### 2. **Emotional Expression**
-- **Emotional Range**: Track how varied your emotional delivery is
-- **Intensity Matching**: Is your energy matching the scene's requirements?
-- **Consistency**: Maintain character throughout the scene
+### 2. **Emotional Expression** (NEW: AI-Powered!)
+- **Voice Emotion**: SpeechBrain AI detects emotions from your voice (happy, sad, angry, fear, etc.)
+- **Face Expression**: ViT model analyzes facial expressions in real-time
+- **Text Sentiment**: GoEmotions analyzes the emotional content of your words
+- **Arousal/Energy**: Track emotional activation levels throughout your performance
+- **Expressiveness Score**: Are you being expressive enough for the scene?
+- **Emotional Range**: How varied is your emotional delivery?
 
 ### 3. **Physical Presence**
 - **Eye Contact**: Critical for auditions - are you connecting with the camera/audience?
@@ -122,13 +133,24 @@ cd "C:\Users\wwwdo\Desktop\real-time AI coach"
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 
-# 3. Install dependencies
+# 3. Install PyTorch with CUDA (for GPU acceleration)
+pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# 4. Install other dependencies
 pip install -r requirements.txt
 
-# 4. Start the server
+# 5. (OPTIONAL but recommended) Install Ollama for LLM tips
+# Download from: https://ollama.ai
+# Then run:
+ollama pull llama3.2
+
+# 6. Start Ollama (in separate terminal)
+ollama serve
+
+# 7. Start the server
 python server.py
 
-# 5. Open browser
+# 8. Open browser
 # Go to http://localhost:8000
 ```
 
@@ -206,13 +228,22 @@ real-time AI coach/
 ├── vision_pipeline.py     # Face/gaze/presence analysis
 ├── asr_pipeline.py        # Speech-to-text (faster-whisper)
 ├── fusion_engine.py       # Combine all metrics + smoothing
-├── coach_engine.py        # Actor-specific coaching logic
+├── coach_engine.py        # Rule-based coaching logic
 ├── session_recorder.py    # Save sessions to disk
-├── actor_coach.py         # NEW: Actor-specific coaching rules
+├── actor_coach.py         # Actor-specific coaching rules
+│
+├── emotion_engine.py      # 🆕 Multimodal emotion detection
+│                          #    - SpeechBrain audio emotion
+│                          #    - GoEmotions text sentiment
+│                          #    - Face expression analysis
+│
+├── llm_coach.py           # 🆕 Ollama/Llama LLM integration
+│                          #    - Rich director's notes
+│                          #    - Context-aware coaching
 │
 ├── frontend/
 │   ├── index.html         # Main UI
-│   ├── styles.css         # Styling
+│   ├── styles.css         # Styling (emotion panel)
 │   └── client.js          # WebSocket + media capture
 │
 ├── sessions/              # Saved practice sessions
@@ -221,8 +252,8 @@ real-time AI coach/
 │       ├── transcript.txt
 │       └── metrics.json
 │
-└── scripts/               # Your scripts/sides for practice
-    └── example_monologue.txt
+└── models/                # Downloaded AI models (auto-created)
+    └── speechbrain_ser/   # SpeechBrain emotion model
 ```
 
 ---
@@ -245,10 +276,30 @@ class Config:
     SMOOTHING_ALPHA = 0.3   # Higher = more responsive, more jittery
     TIP_COOLDOWN_SEC = 3.0  # Min time between tips of same type
     
-    # Optional LLM
-    USE_LLM = False         # Enable Ollama for richer feedback
-    OLLAMA_MODEL = "llama3.2"
+    # LLM (Ollama) - set USE_LLM = True to enable
+    USE_LLM = True          # Enable Ollama for rich director's notes
+    OLLAMA_MODEL = "llama3.2"  # Fast model, good for real-time
+    LLM_PROMPT_INTERVAL = 8.0  # Seconds between LLM tips
+    
+    # Emotion Detection
+    USE_AUDIO_EMOTION = True   # SpeechBrain voice emotion
+    USE_FACE_EMOTION = False   # Face emotion (slower, optional)
+    USE_TEXT_EMOTION = True    # GoEmotions text analysis
 ```
+
+---
+
+## 🧠 AI Models Used
+
+| Model | Purpose | Size | GPU Memory |
+|-------|---------|------|------------|
+| **faster-whisper (base)** | Speech-to-text | ~150MB | ~500MB |
+| **MediaPipe FaceMesh** | Face detection/gaze | Tiny | ~100MB |
+| **SpeechBrain wav2vec2** | Voice emotion | ~300MB | ~800MB |
+| **GoEmotions (RoBERTa)** | Text sentiment | ~500MB | ~600MB |
+| **Llama 3.2** (via Ollama) | Rich coaching tips | ~2GB | ~4GB |
+
+All models run **locally on your GPU** - no cloud, no API costs!
 
 ---
 
