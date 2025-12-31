@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎭 Actor's AI Coach - Real-Time Rehearsal</title>
+    <title>🎭 Scivora - Perfect Every Performance</title>
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,305 +11,543 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Header -->
+        <!-- Header with Branding -->
         <header class="header">
             <div class="logo">
                 <span class="logo-icon">🎭</span>
-                <h1>Actor's Coach</h1>
-            </div>
-            
-            <div class="mode-selector" id="modeSelector">
-                <button class="mode-badge" id="modeBadge">
-                    <span class="mode-icon">🎬</span>
-                    <span class="mode-name">Free Practice</span>
-                    <span class="mode-arrow">▼</span>
-                </button>
-                <div class="mode-dropdown hidden" id="modeDropdown">
-                    <div class="mode-option active" data-mode="free_practice">
-                        <span class="opt-icon">🎬</span>
-                        <div class="opt-info">
-                            <span class="opt-name">Free Practice</span>
-                            <span class="opt-desc">Open rehearsal mode</span>
-                        </div>
-                    </div>
-                    <div class="mode-option" data-mode="monologue">
-                        <span class="opt-icon">🎤</span>
-                        <div class="opt-info">
-                            <span class="opt-name">Monologue</span>
-                            <span class="opt-desc">Solo piece practice</span>
-                        </div>
-                    </div>
-                    <div class="mode-option" data-mode="self_tape">
-                        <span class="opt-icon">📹</span>
-                        <div class="opt-info">
-                            <span class="opt-name">Self-Tape Prep</span>
-                            <span class="opt-desc">Audition preparation</span>
-                        </div>
-                    </div>
-                    <div class="mode-option" data-mode="cold_read">
-                        <span class="opt-icon">📄</span>
-                        <div class="opt-info">
-                            <span class="opt-name">Cold Read</span>
-                            <span class="opt-desc">First time with material</span>
-                        </div>
-                    </div>
+                <div class="logo-text">
+                    <h1>Scivora</h1>
+                    <span class="tagline">Perfect Every Performance</span>
                 </div>
             </div>
             
-            <div class="session-timer" id="sessionTimer">00:00</div>
+            <!-- Main Navigation Tabs -->
+            <nav class="main-tabs">
+                <button class="tab-btn active" data-tab="realtime">
+                    <span class="tab-icon">⚡</span>
+                    <span class="tab-name">Real-Time</span>
+                </button>
+                <button class="tab-btn" data-tab="selftape">
+                    <span class="tab-icon">📹</span>
+                    <span class="tab-name">Self-Tape</span>
+                </button>
+                <button class="tab-btn" data-tab="coaches">
+                    <span class="tab-icon">🏆</span>
+                    <span class="tab-name">Coaches</span>
+                </button>
+            </nav>
             
-            <div class="status-badge" id="statusBadge">
-                <span class="status-dot"></span>
-                <span class="status-text">Connecting...</span>
+            <div class="header-right">
+                <div class="session-timer" id="sessionTimer">00:00</div>
+                <div class="status-badge" id="statusBadge">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Connecting...</span>
+                </div>
             </div>
         </header>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Left Column: Video + Controls -->
-            <section class="video-section">
-                <div class="video-container">
-                    <video id="videoPreview" autoplay muted playsinline></video>
-                    <canvas id="videoCanvas" class="hidden"></canvas>
-                    
-                    <!-- Video overlays -->
-                    <div class="video-overlay">
-                        <div class="indicator face-indicator" id="faceIndicator">
-                            <span class="indicator-icon">👤</span>
-                            <span class="indicator-text">No face detected</span>
-                        </div>
-                        <div class="indicator gaze-indicator" id="gazeIndicator">
-                            <span class="indicator-icon">👁</span>
-                            <span class="indicator-text">Looking away</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Speaking indicator -->
-                    <div class="speaking-indicator" id="speakingIndicator">
-                        <div class="speaking-bars">
-                            <span></span><span></span><span></span><span></span><span></span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Session Controls -->
-                <div class="session-controls">
-                    <button id="startBtn" class="btn btn-primary btn-large">
-                        <span class="btn-icon">▶</span>
-                        Begin Rehearsal
-                    </button>
-                    <button id="stopBtn" class="btn btn-danger btn-large hidden">
-                        <span class="btn-icon">⏹</span>
-                        End Session
-                    </button>
-                </div>
-                
-                <!-- Scene Intensity Selector -->
-                <div class="intensity-selector">
-                    <span class="intensity-label">Scene Intensity:</span>
-                    <div class="intensity-options">
-                        <button class="intensity-btn" data-intensity="intimate" title="Quiet, intimate moments">🤫</button>
-                        <button class="intensity-btn active" data-intensity="neutral" title="Normal conversation">😐</button>
-                        <button class="intensity-btn" data-intensity="heightened" title="Emotional scenes">😢</button>
-                        <button class="intensity-btn" data-intensity="intense" title="Arguments, confrontations">😤</button>
-                    </div>
-                </div>
-                
-                <!-- Quick Tips -->
-                <div class="quick-tips">
-                    <div class="tip-header">
-                        <span class="tip-icon">💡</span>
-                        <span>Director's Notes</span>
-                    </div>
-                    <div class="tips-list" id="tipsList">
-                        <div class="tip tip-info">
-                            <span class="tip-icon">🎬</span>
-                            <span class="tip-text">Ready when you are. Click "Begin Rehearsal" to start.</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Right Column: Metrics + Transcript -->
-            <section class="metrics-section">
-                <!-- Overall Score -->
-                <div class="overall-score-card">
-                    <h2>Performance</h2>
-                    <div class="score-display">
-                        <div class="score-ring">
-                            <svg viewBox="0 0 100 100">
-                                <circle class="ring-bg" cx="50" cy="50" r="45"/>
-                                <circle class="ring-progress" id="overallProgress" cx="50" cy="50" r="45" 
-                                        stroke-dasharray="283" stroke-dashoffset="141"/>
-                            </svg>
-                            <div class="score-value">
-                                <span class="score-number" id="overallScore">50</span>
-                                <span class="score-label">Overall</span>
-                            </div>
-                        </div>
-                        <div class="trend-indicator" id="trendIndicator">
-                            <span class="trend-arrow">→</span>
-                            <span class="trend-text">Stable</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Detailed Metrics -->
-                <div class="metrics-grid">
-                    <!-- Delivery -->
-                    <div class="metric-card delivery">
-                        <div class="metric-header">
-                            <span class="metric-icon">🗣️</span>
-                            <span class="metric-title">Delivery</span>
-                        </div>
-                        <div class="metric-item">
-                            <span class="item-label">Pace</span>
-                            <div class="item-bar"><div class="bar-fill" id="paceBar"></div></div>
-                            <span class="item-value" id="paceValue">--</span>
-                            <span class="item-detail" id="paceDetail">-- WPM</span>
-                        </div>
-                        <div class="metric-item">
-                            <span class="item-label">Pauses</span>
-                            <div class="item-bar"><div class="bar-fill" id="pauseBar"></div></div>
-                            <span class="item-value" id="pauseValue">--</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Vocal -->
-                    <div class="metric-card vocal">
-                        <div class="metric-header">
-                            <span class="metric-icon">🎵</span>
-                            <span class="metric-title">Vocal</span>
-                        </div>
-                        <div class="metric-item">
-                            <span class="item-label">Energy</span>
-                            <div class="item-bar"><div class="bar-fill" id="energyBar"></div></div>
-                            <span class="item-value" id="energyValue">--</span>
-                            <span class="item-detail" id="energyDetail">-- dB</span>
-                        </div>
-                        <div class="metric-item">
-                            <span class="item-label">Variety</span>
-                            <div class="item-bar"><div class="bar-fill" id="varietyBar"></div></div>
-                            <span class="item-value" id="varietyValue">--</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Presence -->
-                    <div class="metric-card presence">
-                        <div class="metric-header">
-                            <span class="metric-icon">✨</span>
-                            <span class="metric-title">Presence</span>
-                        </div>
-                        <div class="metric-item">
-                            <span class="item-label">Eye Contact</span>
-                            <div class="item-bar"><div class="bar-fill" id="eyeContactBar"></div></div>
-                            <span class="item-value" id="eyeContactValue">--</span>
-                        </div>
-                        <div class="metric-item">
-                            <span class="item-label">Command</span>
-                            <div class="item-bar"><div class="bar-fill" id="presenceBar"></div></div>
-                            <span class="item-value" id="presenceValue">--</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Technique -->
-                    <div class="metric-card technique">
-                        <div class="metric-header">
-                            <span class="metric-icon">🎯</span>
-                            <span class="metric-title">Technique</span>
-                        </div>
-                        <div class="metric-item">
-                            <span class="item-label">Fillers</span>
-                            <div class="item-bar"><div class="bar-fill" id="fillersBar"></div></div>
-                            <span class="item-value" id="fillersValue">--</span>
-                            <span class="item-detail" id="fillersDetail">0%</span>
-                        </div>
-                        <div class="metric-item">
-                            <span class="item-label">Stability</span>
-                            <div class="item-bar"><div class="bar-fill" id="stabilityBar"></div></div>
-                            <span class="item-value" id="stabilityValue">--</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Emotion Panel (NEW: AI Emotion Detection) -->
-                <div class="emotion-panel">
-                    <div class="emotion-header">
-                        <span class="emotion-icon">🎭</span>
-                        <span>Emotional Read</span>
-                        <span class="emotion-badge" id="emotionBadge">AI Powered</span>
-                    </div>
-                    <div class="emotion-grid">
-                        <!-- Voice Emotion -->
-                        <div class="emotion-card voice-emotion">
-                            <div class="emotion-card-header">
-                                <span class="card-icon">🎙️</span>
-                                <span class="card-title">Voice</span>
-                            </div>
-                            <div class="emotion-display" id="audioEmotion">😐 neutral</div>
-                            <div class="emotion-meter">
-                                <span class="meter-label">Arousal</span>
-                                <div class="meter-bar">
-                                    <div class="meter-fill" id="arousalBar"></div>
+        <!-- ================================================================ -->
+        <!-- TAB 1: REAL-TIME FEEDBACK (Actor's Coach) -->
+        <!-- ================================================================ -->
+        <main class="tab-content active" id="tab-realtime">
+            <div class="realtime-layout">
+                <!-- Left Column: Video + Controls -->
+                <section class="video-section">
+                    <div class="section-header">
+                        <span class="section-icon">🎬</span>
+                        <span>Live Rehearsal</span>
+                        <div class="mode-selector" id="modeSelector">
+                            <button class="mode-badge" id="modeBadge">
+                                <span class="mode-icon">🎬</span>
+                                <span class="mode-name">Free Practice</span>
+                                <span class="mode-arrow">▼</span>
+                            </button>
+                            <div class="mode-dropdown hidden" id="modeDropdown">
+                                <div class="mode-option active" data-mode="free_practice">
+                                    <span class="opt-icon">🎬</span>
+                                    <div class="opt-info">
+                                        <span class="opt-name">Free Practice</span>
+                                        <span class="opt-desc">Open rehearsal mode</span>
+                                    </div>
+                                </div>
+                                <div class="mode-option" data-mode="monologue">
+                                    <span class="opt-icon">🎤</span>
+                                    <div class="opt-info">
+                                        <span class="opt-name">Monologue</span>
+                                        <span class="opt-desc">Solo piece practice</span>
+                                    </div>
+                                </div>
+                                <div class="mode-option" data-mode="self_tape">
+                                    <span class="opt-icon">📹</span>
+                                    <div class="opt-info">
+                                        <span class="opt-name">Self-Tape Prep</span>
+                                        <span class="opt-desc">Audition preparation</span>
+                                    </div>
+                                </div>
+                                <div class="mode-option" data-mode="cold_read">
+                                    <span class="opt-icon">📄</span>
+                                    <div class="opt-info">
+                                        <span class="opt-name">Cold Read</span>
+                                        <span class="opt-desc">First time with material</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    
+                    <div class="video-container">
+                        <video id="videoPreview" autoplay muted playsinline></video>
+                        <canvas id="videoCanvas" class="hidden"></canvas>
                         
-                        <!-- Face Emotion -->
-                        <div class="emotion-card face-emotion">
-                            <div class="emotion-card-header">
-                                <span class="card-icon">👤</span>
-                                <span class="card-title">Expression</span>
+                        <!-- Video overlays -->
+                        <div class="video-overlay">
+                            <div class="indicator face-indicator" id="faceIndicator">
+                                <span class="indicator-icon">👤</span>
+                                <span class="indicator-text">No face detected</span>
                             </div>
-                            <div class="emotion-display" id="faceEmotion">😐 neutral</div>
-                            <div class="emotion-meter">
-                                <span class="meter-label">Expressiveness</span>
-                                <div class="meter-bar">
-                                    <div class="meter-fill" id="expressivenessBar"></div>
-                                </div>
+                            <div class="indicator gaze-indicator" id="gazeIndicator">
+                                <span class="indicator-icon">👁</span>
+                                <span class="indicator-text">Looking away</span>
                             </div>
                         </div>
                         
-                        <!-- Text Sentiment -->
-                        <div class="emotion-card text-emotion">
-                            <div class="emotion-card-header">
-                                <span class="card-icon">📝</span>
-                                <span class="card-title">Script Intent</span>
-                            </div>
-                            <div class="emotion-display" id="textSentiment">— analyzing...</div>
-                            <div class="text-emotions-list" id="textEmotionsList">
-                                <!-- Dynamic emotion tags -->
-                            </div>
-                        </div>
-                        
-                        <!-- Overall Intensity -->
-                        <div class="emotion-card intensity-card">
-                            <div class="emotion-card-header">
-                                <span class="card-icon">⚡</span>
-                                <span class="card-title">Intensity</span>
-                            </div>
-                            <div class="intensity-display">
-                                <div class="intensity-bar-container">
-                                    <div class="emotion-intensity-bar" id="emotionIntensity"></div>
-                                </div>
-                                <span class="intensity-label" id="intensityLabel">Moderate</span>
+                        <!-- Speaking indicator -->
+                        <div class="speaking-indicator" id="speakingIndicator">
+                            <div class="speaking-bars">
+                                <span></span><span></span><span></span><span></span><span></span>
                             </div>
                         </div>
                     </div>
-                </div>
+                    
+                    <!-- Session Controls -->
+                    <div class="session-controls">
+                        <button id="startBtn" class="btn btn-primary btn-large">
+                            <span class="btn-icon">▶</span>
+                            Begin Rehearsal
+                        </button>
+                        <button id="stopBtn" class="btn btn-danger btn-large hidden">
+                            <span class="btn-icon">⏹</span>
+                            End Session
+                        </button>
+                    </div>
+                    
+                    <!-- Scene Intensity Selector -->
+                    <div class="intensity-selector">
+                        <span class="intensity-label">Scene Intensity:</span>
+                        <div class="intensity-options">
+                            <button class="intensity-btn" data-intensity="intimate" title="Quiet, intimate moments">🤫</button>
+                            <button class="intensity-btn active" data-intensity="neutral" title="Normal conversation">😐</button>
+                            <button class="intensity-btn" data-intensity="heightened" title="Emotional scenes">😢</button>
+                            <button class="intensity-btn" data-intensity="intense" title="Arguments, confrontations">😤</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Tips -->
+                    <div class="quick-tips">
+                        <div class="tip-header">
+                            <span class="tip-icon">💡</span>
+                            <span>Director's Notes</span>
+                        </div>
+                        <div class="tips-list" id="tipsList">
+                            <div class="tip tip-info">
+                                <span class="tip-icon">🎬</span>
+                                <span class="tip-text">Ready when you are. Click "Begin Rehearsal" to start.</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
-                <!-- Live Transcript -->
-                <div class="transcript-card">
-                    <div class="transcript-header">
-                        <span class="transcript-icon">📝</span>
-                        <span>Live Transcript</span>
-                        <span class="word-count" id="wordCount">0 words</span>
+                <!-- Right Column: Metrics + Transcript -->
+                <section class="metrics-section">
+                    <!-- Overall Score -->
+                    <div class="overall-score-card">
+                        <h2>Performance</h2>
+                        <div class="score-display">
+                            <div class="score-ring">
+                                <svg viewBox="0 0 100 100">
+                                    <circle class="ring-bg" cx="50" cy="50" r="45"/>
+                                    <circle class="ring-progress" id="overallProgress" cx="50" cy="50" r="45" 
+                                            stroke-dasharray="283" stroke-dashoffset="141"/>
+                                </svg>
+                                <div class="score-value">
+                                    <span class="score-number" id="overallScore">50</span>
+                                    <span class="score-label">Overall</span>
+                                </div>
+                            </div>
+                            <div class="trend-indicator" id="trendIndicator">
+                                <span class="trend-arrow">→</span>
+                                <span class="trend-text">Stable</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="transcript-box" id="transcriptBox">
-                        <p class="transcript-placeholder">Your performance will be transcribed here in real-time...</p>
+
+                    <!-- Detailed Metrics -->
+                    <div class="metrics-grid">
+                        <!-- Delivery -->
+                        <div class="metric-card delivery">
+                            <div class="metric-header">
+                                <span class="metric-icon">🗣️</span>
+                                <span class="metric-title">Delivery</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="item-label">Pace</span>
+                                <div class="item-bar"><div class="bar-fill" id="paceBar"></div></div>
+                                <span class="item-value" id="paceValue">--</span>
+                                <span class="item-detail" id="paceDetail">-- WPM</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="item-label">Pauses</span>
+                                <div class="item-bar"><div class="bar-fill" id="pauseBar"></div></div>
+                                <span class="item-value" id="pauseValue">--</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Vocal -->
+                        <div class="metric-card vocal">
+                            <div class="metric-header">
+                                <span class="metric-icon">🎵</span>
+                                <span class="metric-title">Vocal</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="item-label">Energy</span>
+                                <div class="item-bar"><div class="bar-fill" id="energyBar"></div></div>
+                                <span class="item-value" id="energyValue">--</span>
+                                <span class="item-detail" id="energyDetail">-- dB</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="item-label">Variety</span>
+                                <div class="item-bar"><div class="bar-fill" id="varietyBar"></div></div>
+                                <span class="item-value" id="varietyValue">--</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Presence -->
+                        <div class="metric-card presence">
+                            <div class="metric-header">
+                                <span class="metric-icon">✨</span>
+                                <span class="metric-title">Presence</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="item-label">Eye Contact</span>
+                                <div class="item-bar"><div class="bar-fill" id="eyeContactBar"></div></div>
+                                <span class="item-value" id="eyeContactValue">--</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="item-label">Command</span>
+                                <div class="item-bar"><div class="bar-fill" id="presenceBar"></div></div>
+                                <span class="item-value" id="presenceValue">--</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Technique -->
+                        <div class="metric-card technique">
+                            <div class="metric-header">
+                                <span class="metric-icon">🎯</span>
+                                <span class="metric-title">Technique</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="item-label">Fillers</span>
+                                <div class="item-bar"><div class="bar-fill" id="fillersBar"></div></div>
+                                <span class="item-value" id="fillersValue">--</span>
+                                <span class="item-detail" id="fillersDetail">0%</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="item-label">Stability</span>
+                                <div class="item-bar"><div class="bar-fill" id="stabilityBar"></div></div>
+                                <span class="item-value" id="stabilityValue">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Emotion Panel -->
+                    <div class="emotion-panel">
+                        <div class="emotion-header">
+                            <span class="emotion-icon">🎭</span>
+                            <span>Emotional Read</span>
+                            <span class="emotion-badge" id="emotionBadge">AI Powered</span>
+                        </div>
+                        <div class="emotion-grid">
+                            <div class="emotion-card voice-emotion">
+                                <div class="emotion-card-header">
+                                    <span class="card-icon">🎙️</span>
+                                    <span class="card-title">Voice</span>
+                                </div>
+                                <div class="emotion-display" id="audioEmotion">😐 neutral</div>
+                                <div class="emotion-meter">
+                                    <span class="meter-label">Arousal</span>
+                                    <div class="meter-bar"><div class="meter-fill" id="arousalBar"></div></div>
+                                </div>
+                            </div>
+                            
+                            <div class="emotion-card face-emotion">
+                                <div class="emotion-card-header">
+                                    <span class="card-icon">👤</span>
+                                    <span class="card-title">Expression</span>
+                                </div>
+                                <div class="emotion-display" id="faceEmotion">😐 neutral</div>
+                                <div class="emotion-meter">
+                                    <span class="meter-label">Expressiveness</span>
+                                    <div class="meter-bar"><div class="meter-fill" id="expressivenessBar"></div></div>
+                                </div>
+                            </div>
+                            
+                            <div class="emotion-card text-emotion">
+                                <div class="emotion-card-header">
+                                    <span class="card-icon">📝</span>
+                                    <span class="card-title">Script Intent</span>
+                                </div>
+                                <div class="emotion-display" id="textSentiment">— analyzing...</div>
+                                <div class="text-emotions-list" id="textEmotionsList"></div>
+                            </div>
+                            
+                            <div class="emotion-card intensity-card">
+                                <div class="emotion-card-header">
+                                    <span class="card-icon">⚡</span>
+                                    <span class="card-title">Intensity</span>
+                                </div>
+                                <div class="intensity-display">
+                                    <div class="intensity-bar-container">
+                                        <div class="emotion-intensity-bar" id="emotionIntensity"></div>
+                                    </div>
+                                    <span class="intensity-label" id="intensityLabel">Moderate</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Transcript -->
+                    <div class="transcript-card">
+                        <div class="transcript-header">
+                            <span class="transcript-icon">📝</span>
+                            <span>Live Transcript</span>
+                            <span class="word-count" id="wordCount">0 words</span>
+                        </div>
+                        <div class="transcript-box" id="transcriptBox">
+                            <p class="transcript-placeholder">Your performance will be transcribed here in real-time...</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- ================================================================ -->
+        <!-- TAB 2: SELF-TAPE STUDIO -->
+        <!-- ================================================================ -->
+        <main class="tab-content" id="tab-selftape">
+            <div class="selftape-layout">
+                <!-- Hero Section -->
+                <div class="selftape-hero">
+                    <div class="hero-content">
+                        <h2>📹 Self-Tape Studio</h2>
+                        <p>Your complete self-taping and rehearsal assistant. Record, review, and perfect your performance.</p>
                     </div>
                 </div>
-            </section>
+                
+                <!-- Recording Section -->
+                <div class="selftape-main">
+                    <div class="recording-panel">
+                        <div class="recording-preview">
+                            <video id="selftapePreview" autoplay muted playsinline></video>
+                            <canvas id="selftapeCanvas" class="hidden"></canvas>
+                            
+                            <!-- Recording indicator -->
+                            <div class="recording-indicator hidden" id="recordingIndicator">
+                                <span class="rec-dot"></span>
+                                <span class="rec-text">REC</span>
+                                <span class="rec-time" id="recTime">00:00</span>
+                            </div>
+                            
+                            <!-- Framing guide -->
+                            <div class="framing-guide" id="framingGuide">
+                                <div class="guide-box"></div>
+                                <span class="guide-tip">Frame yourself in the center</span>
+                            </div>
+                        </div>
+                        
+                        <div class="recording-controls">
+                            <button id="selftapeRecordBtn" class="btn btn-record btn-large">
+                                <span class="btn-icon">⏺</span>
+                                Start Recording
+                            </button>
+                            <button id="selftapeStopBtn" class="btn btn-danger btn-large hidden">
+                                <span class="btn-icon">⏹</span>
+                                Stop Recording
+                            </button>
+                        </div>
+                        
+                        <!-- Quick Settings -->
+                        <div class="recording-settings">
+                            <div class="setting-item">
+                                <span class="setting-label">Quality:</span>
+                                <select id="recordingQuality">
+                                    <option value="720p">720p (Standard)</option>
+                                    <option value="1080p" selected>1080p (HD)</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <span class="setting-label">Reader Voice:</span>
+                                <select id="readerVoice">
+                                    <option value="none">None (Solo)</option>
+                                    <option value="male">Male Reader</option>
+                                    <option value="female">Female Reader</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Script/Lines Panel -->
+                    <div class="script-panel">
+                        <div class="script-header">
+                            <span class="script-icon">📄</span>
+                            <span>Your Lines</span>
+                            <button class="btn btn-small btn-secondary" id="loadScriptBtn">Load Script</button>
+                        </div>
+                        <div class="script-content">
+                            <textarea id="scriptInput" placeholder="Paste your sides/script here...
+
+Example:
+SARAH: I can't believe you said that.
+[BEAT]
+JOHN: I didn't mean it that way.
+SARAH: Then what did you mean?"></textarea>
+                        </div>
+                        <div class="script-tools">
+                            <button class="tool-btn" id="highlightLinesBtn" title="Highlight your lines">
+                                <span>🎯</span> My Lines
+                            </button>
+                            <button class="tool-btn" id="clearScriptBtn" title="Clear script">
+                                <span>🗑️</span> Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recorded Takes -->
+                <div class="takes-section">
+                    <div class="takes-header">
+                        <h3>📼 Your Takes</h3>
+                        <span class="takes-count" id="takesCount">0 recordings</span>
+                    </div>
+                    <div class="takes-grid" id="takesGrid">
+                        <div class="empty-takes">
+                            <span class="empty-icon">🎬</span>
+                            <p>No recordings yet. Start your first take!</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Analysis Section (shown after recording) -->
+                <div class="analysis-section hidden" id="analysisSection">
+                    <div class="analysis-header">
+                        <h3>📊 Take Analysis</h3>
+                        <button class="btn btn-small btn-primary" id="analyzeBtn">Analyze Take</button>
+                    </div>
+                    <div class="analysis-content" id="analysisContent">
+                        <!-- Will be populated with analysis results -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- ================================================================ -->
+        <!-- TAB 3: OTHER COACHES -->
+        <!-- ================================================================ -->
+        <main class="tab-content" id="tab-coaches">
+            <div class="coaches-layout">
+                <div class="coaches-hero">
+                    <h2>🏆 Choose Your Coach</h2>
+                    <p>The same powerful AI technology, tailored for different disciplines. Select a coach to get started.</p>
+                </div>
+                
+                <div class="coaches-grid">
+                    <!-- Swim Coach -->
+                    <div class="coach-card" data-coach="swim">
+                        <div class="coach-icon">🏊</div>
+                        <h3>Swim Coach</h3>
+                        <p>Analyze stroke technique, body position, and breathing patterns.</p>
+                        <div class="coach-features">
+                            <span class="feature">Stroke Analysis</span>
+                            <span class="feature">Lap Timing</span>
+                            <span class="feature">Form Feedback</span>
+                        </div>
+                        <button class="btn btn-primary btn-coach">Start Training</button>
+                    </div>
+                    
+                    <!-- Gym Coach -->
+                    <div class="coach-card" data-coach="gym">
+                        <div class="coach-icon">🏋️</div>
+                        <h3>Gym Coach</h3>
+                        <p>Real-time form correction for exercises and weightlifting.</p>
+                        <div class="coach-features">
+                            <span class="feature">Rep Counting</span>
+                            <span class="feature">Form Check</span>
+                            <span class="feature">Range of Motion</span>
+                        </div>
+                        <button class="btn btn-primary btn-coach">Start Training</button>
+                    </div>
+                    
+                    <!-- Dance Coach -->
+                    <div class="coach-card" data-coach="dance">
+                        <div class="coach-icon">💃</div>
+                        <h3>Dance Posture</h3>
+                        <p>Perfect your posture, alignment, and movement quality.</p>
+                        <div class="coach-features">
+                            <span class="feature">Posture Analysis</span>
+                            <span class="feature">Balance Check</span>
+                            <span class="feature">Movement Flow</span>
+                        </div>
+                        <button class="btn btn-primary btn-coach">Start Training</button>
+                    </div>
+                    
+                    <!-- Music Coach -->
+                    <div class="coach-card" data-coach="music">
+                        <div class="coach-icon">🎸</div>
+                        <h3>Music Coach</h3>
+                        <p>Improve your instrument technique and performance presence.</p>
+                        <div class="coach-features">
+                            <span class="feature">Posture Check</span>
+                            <span class="feature">Hand Position</span>
+                            <span class="feature">Stage Presence</span>
+                        </div>
+                        <button class="btn btn-primary btn-coach">Start Training</button>
+                    </div>
+                    
+                    <!-- Life Coach -->
+                    <div class="coach-card" data-coach="life">
+                        <div class="coach-icon">🧘</div>
+                        <h3>Life Coach</h3>
+                        <p>Communication skills, confidence, and personal presence.</p>
+                        <div class="coach-features">
+                            <span class="feature">Communication</span>
+                            <span class="feature">Confidence</span>
+                            <span class="feature">Body Language</span>
+                        </div>
+                        <button class="btn btn-primary btn-coach">Start Training</button>
+                    </div>
+                    
+                    <!-- Presentation Coach -->
+                    <div class="coach-card" data-coach="presentation">
+                        <div class="coach-icon">📊</div>
+                        <h3>Presentation</h3>
+                        <p>Master public speaking and business presentations.</p>
+                        <div class="coach-features">
+                            <span class="feature">Pacing</span>
+                            <span class="feature">Eye Contact</span>
+                            <span class="feature">Engagement</span>
+                        </div>
+                        <button class="btn btn-primary btn-coach">Start Training</button>
+                    </div>
+                </div>
+                
+                <!-- Coming Soon Banner -->
+                <div class="coming-soon-banner">
+                    <span class="banner-icon">🚀</span>
+                    <div class="banner-content">
+                        <h4>More Coaches Coming Soon!</h4>
+                        <p>Yoga, Martial Arts, Interview Prep, and more...</p>
+                    </div>
+                </div>
+            </div>
         </main>
 
         <!-- Footer -->
@@ -355,6 +593,27 @@
             <div class="modal-footer">
                 <button class="btn btn-primary" id="newSessionBtn">New Session</button>
                 <button class="btn btn-secondary" id="saveSummaryBtn">Save Notes</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Take Playback Modal -->
+    <div class="modal hidden" id="playbackModal">
+        <div class="modal-content playback-modal">
+            <div class="modal-header">
+                <h2>📹 Review Take</h2>
+                <button class="modal-close" id="closePlaybackBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <video id="playbackVideo" controls></video>
+                <div class="playback-analysis" id="playbackAnalysis">
+                    <!-- Analysis results -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="deleteTakeBtn">Delete</button>
+                <button class="btn btn-secondary" id="downloadTakeBtn">Download</button>
+                <button class="btn btn-primary" id="reanalyzeTakeBtn">Re-Analyze</button>
             </div>
         </div>
     </div>

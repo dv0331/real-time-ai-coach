@@ -999,4 +999,292 @@ initModeSelector();
 // Connect to WebSocket on load
 connectWebSocket();
 
-console.log('🎭 Actor\'s AI Coach initialized - Break a leg!');
+// ============================================================================
+// TAB NAVIGATION
+// ============================================================================
+
+const tabs = document.querySelectorAll('.tab-btn');
+const tabContents = document.querySelectorAll('.tab-content');
+
+tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+        const targetTab = tab.dataset.tab;
+        
+        // Update active tab button
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        // Show target content
+        tabContents.forEach(content => {
+            content.classList.remove('active');
+            if (content.id === `tab-${targetTab}`) {
+                content.classList.add('active');
+            }
+        });
+        
+        // Initialize self-tape preview if switching to that tab
+        if (targetTab === 'selftape') {
+            initSelftapePreview();
+        }
+        
+        console.log(`📑 Switched to tab: ${targetTab}`);
+    });
+});
+
+// ============================================================================
+// SELF-TAPE STUDIO
+// ============================================================================
+
+let selftapeState = {
+    mediaStream: null,
+    mediaRecorder: null,
+    recordedChunks: [],
+    isRecording: false,
+    recordingStartTime: null,
+    recordingTimer: null,
+    takes: []
+};
+
+async function initSelftapePreview() {
+    const preview = document.getElementById('selftapePreview');
+    
+    if (!preview) return;
+    
+    // If already have stream, just connect
+    if (selftapeState.mediaStream) {
+        preview.srcObject = selftapeState.mediaStream;
+        return;
+    }
+    
+    try {
+        selftapeState.mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                width: { ideal: 1920 },
+                height: { ideal: 1080 },
+                facingMode: 'user'
+            },
+            audio: true
+        });
+        
+        preview.srcObject = selftapeState.mediaStream;
+        console.log('📹 Self-tape preview ready');
+    } catch (error) {
+        console.error('Failed to access camera:', error);
+        alert('Could not access camera. Please check permissions.');
+    }
+}
+
+function startSelftapeRecording() {
+    if (!selftapeState.mediaStream) {
+        alert('Camera not ready. Please wait...');
+        return;
+    }
+    
+    // Clear previous recording
+    selftapeState.recordedChunks = [];
+    
+    // Create MediaRecorder
+    const options = { mimeType: 'video/webm;codecs=vp9,opus' };
+    try {
+        selftapeState.mediaRecorder = new MediaRecorder(selftapeState.mediaStream, options);
+    } catch (e) {
+        // Fallback
+        selftapeState.mediaRecorder = new MediaRecorder(selftapeState.mediaStream);
+    }
+    
+    selftapeState.mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+            selftapeState.recordedChunks.push(event.data);
+        }
+    };
+    
+    selftapeState.mediaRecorder.onstop = () => {
+        finishRecording();
+    };
+    
+    // Start recording
+    selftapeState.mediaRecorder.start(1000); // Collect data every second
+    selftapeState.isRecording = true;
+    selftapeState.recordingStartTime = Date.now();
+    
+    // Update UI
+    document.getElementById('selftapeRecordBtn').classList.add('hidden');
+    document.getElementById('selftapeStopBtn').classList.remove('hidden');
+    document.getElementById('recordingIndicator').classList.remove('hidden');
+    document.getElementById('framingGuide').classList.add('hidden');
+    
+    // Start timer
+    selftapeState.recordingTimer = setInterval(updateRecordingTime, 1000);
+    
+    console.log('🔴 Recording started');
+}
+
+function stopSelftapeRecording() {
+    if (selftapeState.mediaRecorder && selftapeState.isRecording) {
+        selftapeState.mediaRecorder.stop();
+        selftapeState.isRecording = false;
+        
+        // Clear timer
+        if (selftapeState.recordingTimer) {
+            clearInterval(selftapeState.recordingTimer);
+            selftapeState.recordingTimer = null;
+        }
+        
+        // Update UI
+        document.getElementById('selftapeRecordBtn').classList.remove('hidden');
+        document.getElementById('selftapeStopBtn').classList.add('hidden');
+        document.getElementById('recordingIndicator').classList.add('hidden');
+        document.getElementById('framingGuide').classList.remove('hidden');
+        
+        console.log('⏹ Recording stopped');
+    }
+}
+
+function updateRecordingTime() {
+    const elapsed = Math.floor((Date.now() - selftapeState.recordingStartTime) / 1000);
+    const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+    const seconds = (elapsed % 60).toString().padStart(2, '0');
+    document.getElementById('recTime').textContent = `${minutes}:${seconds}`;
+}
+
+function finishRecording() {
+    const blob = new Blob(selftapeState.recordedChunks, { type: 'video/webm' });
+    const url = URL.createObjectURL(blob);
+    
+    // Create take object
+    const take = {
+        id: Date.now(),
+        name: `Take ${selftapeState.takes.length + 1}`,
+        url: url,
+        blob: blob,
+        duration: Math.floor((Date.now() - selftapeState.recordingStartTime) / 1000),
+        timestamp: new Date().toLocaleTimeString()
+    };
+    
+    selftapeState.takes.push(take);
+    
+    // Update takes grid
+    updateTakesGrid();
+    
+    console.log(`📼 Take saved: ${take.name}`);
+}
+
+function updateTakesGrid() {
+    const grid = document.getElementById('takesGrid');
+    const count = document.getElementById('takesCount');
+    
+    if (!grid) return;
+    
+    count.textContent = `${selftapeState.takes.length} recording${selftapeState.takes.length !== 1 ? 's' : ''}`;
+    
+    if (selftapeState.takes.length === 0) {
+        grid.innerHTML = `
+            <div class="empty-takes">
+                <span class="empty-icon">🎬</span>
+                <p>No recordings yet. Start your first take!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    grid.innerHTML = selftapeState.takes.map(take => `
+        <div class="take-card" data-take-id="${take.id}">
+            <div class="take-thumbnail">
+                <video src="${take.url}" muted></video>
+                <span class="take-duration">${formatDuration(take.duration)}</span>
+            </div>
+            <div class="take-info">
+                <div class="take-name">${take.name}</div>
+                <div class="take-time">${take.timestamp}</div>
+            </div>
+        </div>
+    `).join('');
+    
+    // Add click handlers
+    grid.querySelectorAll('.take-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const takeId = parseInt(card.dataset.takeId);
+            const take = selftapeState.takes.find(t => t.id === takeId);
+            if (take) {
+                openTakePlayback(take);
+            }
+        });
+        
+        // Generate thumbnail on hover
+        const video = card.querySelector('video');
+        video.addEventListener('loadeddata', () => {
+            video.currentTime = 0.5; // Jump to 0.5s for thumbnail
+        });
+    });
+}
+
+function formatDuration(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+function openTakePlayback(take) {
+    const modal = document.getElementById('playbackModal');
+    const video = document.getElementById('playbackVideo');
+    
+    if (!modal || !video) return;
+    
+    video.src = take.url;
+    modal.classList.remove('hidden');
+    
+    // Store current take ID for delete/download
+    modal.dataset.currentTakeId = take.id;
+}
+
+// Self-tape event listeners
+document.getElementById('selftapeRecordBtn')?.addEventListener('click', startSelftapeRecording);
+document.getElementById('selftapeStopBtn')?.addEventListener('click', stopSelftapeRecording);
+document.getElementById('closePlaybackBtn')?.addEventListener('click', () => {
+    document.getElementById('playbackModal').classList.add('hidden');
+    document.getElementById('playbackVideo').pause();
+});
+
+document.getElementById('downloadTakeBtn')?.addEventListener('click', () => {
+    const modal = document.getElementById('playbackModal');
+    const takeId = parseInt(modal.dataset.currentTakeId);
+    const take = selftapeState.takes.find(t => t.id === takeId);
+    
+    if (take) {
+        const a = document.createElement('a');
+        a.href = take.url;
+        a.download = `${take.name.replace(/\s/g, '_')}.webm`;
+        a.click();
+    }
+});
+
+document.getElementById('deleteTakeBtn')?.addEventListener('click', () => {
+    const modal = document.getElementById('playbackModal');
+    const takeId = parseInt(modal.dataset.currentTakeId);
+    
+    selftapeState.takes = selftapeState.takes.filter(t => t.id !== takeId);
+    updateTakesGrid();
+    modal.classList.add('hidden');
+});
+
+// ============================================================================
+// COACH CARDS
+// ============================================================================
+
+document.querySelectorAll('.coach-card .btn-coach').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const card = btn.closest('.coach-card');
+        const coachType = card.dataset.coach;
+        
+        // For now, show coming soon alert
+        if (coachType !== 'presentation') {
+            alert(`${coachType.charAt(0).toUpperCase() + coachType.slice(1)} Coach coming soon! 🚀`);
+        } else {
+            // Switch to real-time tab for presentation coach
+            document.querySelector('[data-tab="realtime"]').click();
+        }
+    });
+});
+
+console.log('🎭 Scivora initialized - Perfect Every Performance!');
