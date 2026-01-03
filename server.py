@@ -24,11 +24,25 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from config import config
-from audio_pipeline import AudioPipeline, AudioFeatures
-from vision_pipeline import VisionPipeline, VisionFeatures
+
+# Core pipelines (always available)
 from fusion_engine import FusionEngine, FusedMetrics
 from coach_engine import CoachEngine, CoachingTip
 from session_recorder import SessionRecorder
+
+# Audio/Vision pipelines - conditional based on deployment mode
+if config.deployment.is_cloud:
+    # Cloud mode: minimal imports, no heavy ML dependencies
+    AudioPipeline = None
+    AudioFeatures = None
+    VisionPipeline = None
+    VisionFeatures = None
+    HAS_LOCAL_PIPELINES = False
+else:
+    # Local mode: full ML pipelines
+    from audio_pipeline import AudioPipeline, AudioFeatures
+    from vision_pipeline import VisionPipeline, VisionFeatures
+    HAS_LOCAL_PIPELINES = True
 
 # ASR Pipeline - will be loaded dynamically in load_models()
 # based on deployment mode (local vs cloud)
@@ -176,12 +190,16 @@ def load_models():
     logger.info(f"Loading AI models ({config.deployment.MODE.upper()} mode)...")
     logger.info("=" * 50)
     
-    # Vision pipeline (MediaPipe - works on CPU too)
-    try:
-        _global_vision = VisionPipeline()
-        logger.info("✓ Vision pipeline loaded (MediaPipe)")
-    except Exception as e:
-        logger.warning(f"✗ Vision pipeline failed: {e}")
+    # Vision pipeline (MediaPipe - works on CPU too) - only for local mode
+    if HAS_LOCAL_PIPELINES:
+        try:
+            _global_vision = VisionPipeline()
+            logger.info("✓ Vision pipeline loaded (MediaPipe)")
+        except Exception as e:
+            logger.warning(f"✗ Vision pipeline failed: {e}")
+            _global_vision = None
+    else:
+        logger.info("✗ Vision pipeline skipped (cloud mode)")
         _global_vision = None
     
     # ASR pipeline - Cloud or Local
@@ -264,7 +282,7 @@ class SessionState:
     """Holds all pipeline instances for a session."""
     
     def __init__(self):
-        self.audio = AudioPipeline()
+        self.audio = AudioPipeline() if HAS_LOCAL_PIPELINES else None
         self.vision = _global_vision
         self.asr = _global_asr
         if self.asr:
@@ -302,11 +320,13 @@ class SessionState:
         
     def _on_word(self, word: str, timestamp: float):
         """Callback when ASR detects a word."""
-        self.audio.add_word(word, timestamp)
+        if self.audio:
+            self.audio.add_word(word, timestamp)
     
     def start(self):
         """Start a new session."""
-        self.audio.reset()
+        if self.audio:
+            self.audio.reset()
         if self.vision:
             self.vision.reset()
         if self.asr:
