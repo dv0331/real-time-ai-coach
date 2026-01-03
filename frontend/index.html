@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎭 Scivora - Perfect Every Performance</title>
-    <link rel="stylesheet" href="/static/styles.css?v=4">
+    <link rel="stylesheet" href="/static/styles.css?v=5">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -620,13 +620,23 @@
                 <div class="selftape-hero">
                     <div class="hero-content">
                         <h2>📹 Self-Tape Studio</h2>
-                        <p>Your complete self-taping and rehearsal assistant. Record, review, and perfect your performance.</p>
+                        <p>Record live or upload a video for comprehensive AI analysis of your performance.</p>
+                    </div>
+                    <!-- Mode Toggle -->
+                    <div class="selftape-mode-toggle">
+                        <button class="mode-toggle-btn active" data-selftape-mode="record" id="recordModeBtn">
+                            <span>🎥</span> Record Live
+                        </button>
+                        <button class="mode-toggle-btn" data-selftape-mode="upload" id="uploadModeBtn">
+                            <span>📤</span> Upload Video
+                        </button>
                     </div>
                 </div>
                 
                 <!-- Recording Section -->
                 <div class="selftape-main">
-                    <div class="recording-panel">
+                    <!-- RECORD MODE -->
+                    <div class="recording-panel" id="recordModePanel">
                         <div class="recording-preview">
                             <video id="selftapePreview" autoplay muted playsinline></video>
                             <canvas id="selftapeCanvas" class="hidden"></canvas>
@@ -676,6 +686,57 @@
                         </div>
                     </div>
                     
+                    <!-- UPLOAD MODE -->
+                    <div class="upload-panel hidden" id="uploadModePanel">
+                        <div class="upload-zone" id="uploadZone">
+                            <div class="upload-content">
+                                <span class="upload-icon">📤</span>
+                                <h3>Upload Your Video</h3>
+                                <p>Drag & drop a video file here or click to browse</p>
+                                <p class="upload-formats">Supports: MP4, MOV, WebM, AVI (Max 500MB)</p>
+                                <input type="file" id="videoUploadInput" accept="video/*" hidden>
+                                <button class="btn btn-primary btn-large" id="browseVideoBtn">
+                                    <span class="btn-icon">📁</span>
+                                    Browse Files
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Uploaded Video Preview -->
+                        <div class="uploaded-video-section hidden" id="uploadedVideoSection">
+                            <div class="uploaded-preview">
+                                <video id="uploadedVideoPreview" controls></video>
+                                <div class="video-info" id="uploadedVideoInfo">
+                                    <span class="video-name">video.mp4</span>
+                                    <span class="video-duration">0:00</span>
+                                    <span class="video-size">0 MB</span>
+                                </div>
+                            </div>
+                            <div class="upload-actions">
+                                <button class="btn btn-primary btn-large" id="analyzeUploadedBtn">
+                                    <span class="btn-icon">🤖</span>
+                                    Analyze with AI Director
+                                </button>
+                                <button class="btn btn-secondary" id="changeVideoBtn">
+                                    <span class="btn-icon">🔄</span>
+                                    Change Video
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Analysis Progress -->
+                        <div class="analysis-progress hidden" id="analysisProgress">
+                            <div class="progress-content">
+                                <div class="progress-spinner">🎬</div>
+                                <h3 id="analysisProgressTitle">AI Director is Analyzing...</h3>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" id="analysisProgressBar"></div>
+                                </div>
+                                <p class="progress-status" id="analysisProgressStatus">Extracting video frames...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- Script/Lines Panel -->
                     <div class="script-panel">
                         <div class="script-header">
@@ -717,14 +778,170 @@ SARAH: Then what did you mean?"></textarea>
                     </div>
                 </div>
                 
-                <!-- Analysis Section (shown after recording) -->
+                <!-- Analysis Section (shown after recording/upload) -->
                 <div class="analysis-section hidden" id="analysisSection">
                     <div class="analysis-header">
-                        <h3>📊 Take Analysis</h3>
-                        <button class="btn btn-small btn-primary" id="analyzeBtn">Analyze Take</button>
+                        <h3>🎬 AI Director's Comprehensive Analysis</h3>
+                        <button class="btn btn-small btn-secondary" id="closeAnalysisBtn">✕ Close</button>
                     </div>
+                    
                     <div class="analysis-content" id="analysisContent">
-                        <!-- Will be populated with analysis results -->
+                        <!-- Overall Score -->
+                        <div class="analysis-score-hero">
+                            <div class="score-circle">
+                                <span class="score-value" id="uploadAnalysisScore">--</span>
+                                <span class="score-label">Overall</span>
+                            </div>
+                            <div class="score-verdict" id="uploadAnalysisVerdict">
+                                Upload or record a video to get AI feedback
+                            </div>
+                        </div>
+                        
+                        <!-- Video Analysis -->
+                        <div class="analysis-category">
+                            <h4>📹 Video Analysis</h4>
+                            <div class="metrics-grid">
+                                <div class="metric-item">
+                                    <span class="metric-icon">👁️</span>
+                                    <span class="metric-name">Eye Contact</span>
+                                    <span class="metric-value" id="analyzeEyeContact">--%</span>
+                                    <div class="metric-bar"><div class="metric-fill" id="analyzeEyeContactBar"></div></div>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-icon">🖼️</span>
+                                    <span class="metric-name">Framing</span>
+                                    <span class="metric-value" id="analyzeFraming">--%</span>
+                                    <div class="metric-bar"><div class="metric-fill" id="analyzeFramingBar"></div></div>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-icon">😊</span>
+                                    <span class="metric-name">Expressiveness</span>
+                                    <span class="metric-value" id="analyzeExpressiveness">--%</span>
+                                    <div class="metric-bar"><div class="metric-fill" id="analyzeExpressivenessBar"></div></div>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-icon">🧘</span>
+                                    <span class="metric-name">Posture</span>
+                                    <span class="metric-value" id="analyzePosture">--%</span>
+                                    <div class="metric-bar"><div class="metric-fill" id="analyzePostureBar"></div></div>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-icon">🤲</span>
+                                    <span class="metric-name">Gestures</span>
+                                    <span class="metric-value" id="analyzeGestures">--%</span>
+                                    <div class="metric-bar"><div class="metric-fill" id="analyzeGesturesBar"></div></div>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-icon">🎭</span>
+                                    <span class="metric-name">Presence</span>
+                                    <span class="metric-value" id="analyzePresence">--%</span>
+                                    <div class="metric-bar"><div class="metric-fill" id="analyzePresenceBar"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Voice Analysis -->
+                        <div class="analysis-category">
+                            <h4>🎙️ Voice & Speech Analysis</h4>
+                            <div class="metrics-grid">
+                                <div class="metric-item">
+                                    <span class="metric-icon">🗣️</span>
+                                    <span class="metric-name">Clarity</span>
+                                    <span class="metric-value" id="analyzeClarity">--%</span>
+                                    <div class="metric-bar"><div class="metric-fill" id="analyzeClarityBar"></div></div>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-icon">⏱️</span>
+                                    <span class="metric-name">Pace</span>
+                                    <span class="metric-value" id="analyzePace">-- WPM</span>
+                                    <div class="metric-bar"><div class="metric-fill" id="analyzePaceBar"></div></div>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-icon">⚡</span>
+                                    <span class="metric-name">Energy</span>
+                                    <span class="metric-value" id="analyzeEnergy">--%</span>
+                                    <div class="metric-bar"><div class="metric-fill" id="analyzeEnergyBar"></div></div>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-icon">🎵</span>
+                                    <span class="metric-name">Vocal Variety</span>
+                                    <span class="metric-value" id="analyzeVocalVariety">--%</span>
+                                    <div class="metric-bar"><div class="metric-fill" id="analyzeVocalVarietyBar"></div></div>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-icon">🔊</span>
+                                    <span class="metric-name">Volume</span>
+                                    <span class="metric-value" id="analyzeVolume">-- dB</span>
+                                    <div class="metric-bar"><div class="metric-fill" id="analyzeVolumeBar"></div></div>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-icon">⏸️</span>
+                                    <span class="metric-name">Pause Usage</span>
+                                    <span class="metric-value" id="analyzePauses">--%</span>
+                                    <div class="metric-bar"><div class="metric-fill" id="analyzePausesBar"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Emotional Analysis -->
+                        <div class="analysis-category">
+                            <h4>😊 Emotional Intelligence</h4>
+                            <div class="emotion-timeline" id="emotionTimeline">
+                                <div class="emotion-placeholder">Emotions will appear as the video is analyzed...</div>
+                            </div>
+                            <div class="emotion-summary">
+                                <div class="emotion-stat">
+                                    <span class="stat-label">Dominant Emotion:</span>
+                                    <span class="stat-value" id="analyzeDominantEmotion">--</span>
+                                </div>
+                                <div class="emotion-stat">
+                                    <span class="stat-label">Emotional Range:</span>
+                                    <span class="stat-value" id="analyzeEmotionalRange">--</span>
+                                </div>
+                                <div class="emotion-stat">
+                                    <span class="stat-label">Authenticity:</span>
+                                    <span class="stat-value" id="analyzeAuthenticity">--%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Transcript -->
+                        <div class="analysis-category">
+                            <h4>📝 Speech-to-Text Transcript</h4>
+                            <div class="transcript-content" id="uploadTranscriptContent">
+                                <em>Transcript will appear here after analysis...</em>
+                            </div>
+                            <div class="transcript-stats">
+                                <span><strong>Words:</strong> <span id="analyzeWordCount">--</span></span>
+                                <span><strong>Duration:</strong> <span id="analyzeDuration">--</span></span>
+                                <span><strong>Filler Words:</strong> <span id="analyzeFillerCount">--</span></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Director's Feedback -->
+                        <div class="analysis-category director-feedback">
+                            <h4>🎬 Director's Notes</h4>
+                            <div class="feedback-sections">
+                                <div class="feedback-section strengths">
+                                    <h5>✨ What Worked Well</h5>
+                                    <ul id="analyzeStrengths">
+                                        <li>Analysis pending...</li>
+                                    </ul>
+                                </div>
+                                <div class="feedback-section improvements">
+                                    <h5>🎯 Areas to Improve</h5>
+                                    <ul id="analyzeImprovements">
+                                        <li>Analysis pending...</li>
+                                    </ul>
+                                </div>
+                                <div class="feedback-section exercises">
+                                    <h5>📚 Recommended Exercises</h5>
+                                    <ul id="analyzeExercises">
+                                        <li>Analysis pending...</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1273,6 +1490,6 @@ SARAH: Then what did you mean?"></textarea>
         </div>
     </div>
 
-    <script src="/static/client.js?v=11"></script>
+    <script src="/static/client.js?v=12"></script>
 </body>
 </html>

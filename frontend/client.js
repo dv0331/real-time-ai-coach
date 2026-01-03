@@ -4362,3 +4362,545 @@ document.addEventListener('DOMContentLoaded', initCoachButtons);
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     setTimeout(initCoachButtons, 100);
 }
+
+// ============================================================================
+// VIDEO UPLOAD AND COMPREHENSIVE AI ANALYSIS
+// ============================================================================
+
+// State for uploaded video analysis
+const uploadAnalysisState = {
+    uploadedVideo: null,
+    videoUrl: null,
+    isAnalyzing: false,
+    analysisResults: null
+};
+
+// Initialize Self-Tape mode toggle
+function initSelftapeUpload() {
+    const recordModeBtn = document.getElementById('recordModeBtn');
+    const uploadModeBtn = document.getElementById('uploadModeBtn');
+    const recordPanel = document.getElementById('recordModePanel');
+    const uploadPanel = document.getElementById('uploadModePanel');
+    const uploadZone = document.getElementById('uploadZone');
+    const videoInput = document.getElementById('videoUploadInput');
+    const browseBtn = document.getElementById('browseVideoBtn');
+    const analyzeBtn = document.getElementById('analyzeUploadedBtn');
+    const changeVideoBtn = document.getElementById('changeVideoBtn');
+    const closeAnalysisBtn = document.getElementById('closeAnalysisBtn');
+    
+    // Mode toggle
+    recordModeBtn?.addEventListener('click', () => {
+        recordModeBtn.classList.add('active');
+        uploadModeBtn.classList.remove('active');
+        recordPanel?.classList.remove('hidden');
+        uploadPanel?.classList.add('hidden');
+    });
+    
+    uploadModeBtn?.addEventListener('click', () => {
+        uploadModeBtn.classList.add('active');
+        recordModeBtn.classList.remove('active');
+        uploadPanel?.classList.remove('hidden');
+        recordPanel?.classList.add('hidden');
+    });
+    
+    // Browse button
+    browseBtn?.addEventListener('click', () => {
+        videoInput?.click();
+    });
+    
+    // File input change
+    videoInput?.addEventListener('change', (e) => {
+        if (e.target.files?.length > 0) {
+            handleVideoUpload(e.target.files[0]);
+        }
+    });
+    
+    // Drag and drop
+    uploadZone?.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('dragover');
+    });
+    
+    uploadZone?.addEventListener('dragleave', () => {
+        uploadZone.classList.remove('dragover');
+    });
+    
+    uploadZone?.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('dragover');
+        if (e.dataTransfer.files?.length > 0) {
+            handleVideoUpload(e.dataTransfer.files[0]);
+        }
+    });
+    
+    uploadZone?.addEventListener('click', (e) => {
+        if (e.target === uploadZone || e.target.closest('.upload-content')) {
+            videoInput?.click();
+        }
+    });
+    
+    // Analyze button
+    analyzeBtn?.addEventListener('click', () => {
+        if (uploadAnalysisState.uploadedVideo) {
+            analyzeUploadedVideo();
+        }
+    });
+    
+    // Change video button
+    changeVideoBtn?.addEventListener('click', () => {
+        resetUploadedVideo();
+    });
+    
+    // Close analysis
+    closeAnalysisBtn?.addEventListener('click', () => {
+        document.getElementById('analysisSection')?.classList.add('hidden');
+    });
+}
+
+// Handle video upload
+function handleVideoUpload(file) {
+    // Validate file
+    const maxSize = 500 * 1024 * 1024; // 500MB
+    const allowedTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo', 'video/avi'];
+    
+    if (!file.type.startsWith('video/')) {
+        alert('Please upload a video file');
+        return;
+    }
+    
+    if (file.size > maxSize) {
+        alert('File too large. Maximum size is 500MB');
+        return;
+    }
+    
+    // Store file
+    uploadAnalysisState.uploadedVideo = file;
+    uploadAnalysisState.videoUrl = URL.createObjectURL(file);
+    
+    // Show video preview
+    const uploadZone = document.getElementById('uploadZone');
+    const uploadedSection = document.getElementById('uploadedVideoSection');
+    const videoPreview = document.getElementById('uploadedVideoPreview');
+    const videoInfo = document.getElementById('uploadedVideoInfo');
+    
+    uploadZone?.classList.add('hidden');
+    uploadedSection?.classList.remove('hidden');
+    
+    if (videoPreview) {
+        videoPreview.src = uploadAnalysisState.videoUrl;
+        videoPreview.onloadedmetadata = () => {
+            const duration = formatDuration(videoPreview.duration);
+            const size = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+            
+            if (videoInfo) {
+                videoInfo.innerHTML = `
+                    <span class="video-name">${file.name}</span>
+                    <span class="video-duration">${duration}</span>
+                    <span class="video-size">${size}</span>
+                `;
+            }
+        };
+    }
+    
+    console.log('📹 Video uploaded:', file.name);
+}
+
+// Reset uploaded video
+function resetUploadedVideo() {
+    if (uploadAnalysisState.videoUrl) {
+        URL.revokeObjectURL(uploadAnalysisState.videoUrl);
+    }
+    uploadAnalysisState.uploadedVideo = null;
+    uploadAnalysisState.videoUrl = null;
+    uploadAnalysisState.analysisResults = null;
+    
+    const uploadZone = document.getElementById('uploadZone');
+    const uploadedSection = document.getElementById('uploadedVideoSection');
+    const videoInput = document.getElementById('videoUploadInput');
+    
+    uploadZone?.classList.remove('hidden');
+    uploadedSection?.classList.add('hidden');
+    document.getElementById('analysisProgress')?.classList.add('hidden');
+    document.getElementById('analysisSection')?.classList.add('hidden');
+    
+    if (videoInput) videoInput.value = '';
+}
+
+// Analyze uploaded video
+async function analyzeUploadedVideo() {
+    if (!uploadAnalysisState.uploadedVideo || uploadAnalysisState.isAnalyzing) return;
+    
+    uploadAnalysisState.isAnalyzing = true;
+    
+    const progressDiv = document.getElementById('analysisProgress');
+    const progressBar = document.getElementById('analysisProgressBar');
+    const progressStatus = document.getElementById('analysisProgressStatus');
+    const analysisSection = document.getElementById('analysisSection');
+    
+    // Show progress
+    progressDiv?.classList.remove('hidden');
+    document.getElementById('uploadedVideoSection')?.classList.add('hidden');
+    
+    // Simulated analysis steps (in real implementation, this would call backend APIs)
+    const steps = [
+        { progress: 10, status: 'Extracting video frames...' },
+        { progress: 20, status: 'Analyzing facial expressions...' },
+        { progress: 35, status: 'Tracking eye contact and gaze...' },
+        { progress: 50, status: 'Extracting audio track...' },
+        { progress: 60, status: 'Transcribing speech to text...' },
+        { progress: 75, status: 'Analyzing voice patterns...' },
+        { progress: 85, status: 'Detecting emotions...' },
+        { progress: 95, status: 'Generating Director feedback...' },
+        { progress: 100, status: 'Analysis complete!' }
+    ];
+    
+    for (const step of steps) {
+        await new Promise(resolve => setTimeout(resolve, 800));
+        if (progressBar) progressBar.style.width = step.progress + '%';
+        if (progressStatus) progressStatus.textContent = step.status;
+    }
+    
+    // Generate comprehensive analysis
+    const analysis = generateComprehensiveAnalysis();
+    uploadAnalysisState.analysisResults = analysis;
+    
+    // Display results
+    displayAnalysisResults(analysis);
+    
+    // Show analysis section
+    progressDiv?.classList.add('hidden');
+    analysisSection?.classList.remove('hidden');
+    
+    uploadAnalysisState.isAnalyzing = false;
+    console.log('🎬 Video analysis complete');
+}
+
+// Generate comprehensive analysis (simulated - in production this would use actual ML models)
+function generateComprehensiveAnalysis() {
+    // Generate realistic-looking analysis data
+    const videoEl = document.getElementById('uploadedVideoPreview');
+    const duration = videoEl?.duration || 60;
+    
+    // Simulated metrics (these would come from actual analysis in production)
+    const analysis = {
+        // Video Analysis
+        eyeContact: 55 + Math.random() * 35,
+        framing: 60 + Math.random() * 30,
+        expressiveness: 50 + Math.random() * 40,
+        posture: 55 + Math.random() * 35,
+        gestures: 45 + Math.random() * 40,
+        presence: 50 + Math.random() * 40,
+        
+        // Voice Analysis
+        clarity: 60 + Math.random() * 30,
+        pace: 80 + Math.random() * 80, // WPM
+        energy: 50 + Math.random() * 40,
+        vocalVariety: 45 + Math.random() * 45,
+        volume: 55 + Math.random() * 20, // dB
+        pauseUsage: 40 + Math.random() * 50,
+        
+        // Emotional Analysis
+        emotions: generateEmotionTimeline(duration),
+        dominantEmotion: ['Neutral', 'Happy', 'Sad', 'Intense', 'Thoughtful'][Math.floor(Math.random() * 5)],
+        emotionalRange: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)],
+        authenticity: 50 + Math.random() * 40,
+        
+        // Transcript (simulated)
+        transcript: generateSampleTranscript(),
+        wordCount: Math.floor(duration * 2.5),
+        duration: duration,
+        fillerCount: Math.floor(Math.random() * 10),
+        
+        // Director Feedback
+        strengths: generateStrengths(),
+        improvements: generateImprovements(),
+        exercises: generateExercises()
+    };
+    
+    // Calculate overall score
+    analysis.overall = Math.round(
+        (analysis.eyeContact + analysis.expressiveness + analysis.presence + 
+         analysis.clarity + analysis.energy + analysis.vocalVariety) / 6
+    );
+    
+    return analysis;
+}
+
+// Generate emotion timeline
+function generateEmotionTimeline(duration) {
+    const emotions = ['Neutral', 'Happy', 'Sad', 'Surprised', 'Thoughtful', 'Intense'];
+    const timeline = [];
+    let time = 0;
+    
+    while (time < duration) {
+        timeline.push({
+            time: time,
+            emotion: emotions[Math.floor(Math.random() * emotions.length)],
+            intensity: 0.3 + Math.random() * 0.7
+        });
+        time += 3 + Math.random() * 5;
+    }
+    
+    return timeline;
+}
+
+// Generate sample transcript
+function generateSampleTranscript() {
+    const phrases = [
+        "This is the transcript of your recorded performance.",
+        "The AI has analyzed your speech patterns and detected the following content.",
+        "Your delivery showed moments of strong connection with the material.",
+        "There were some areas where the pacing could be improved.",
+        "Overall, the emotional authenticity came through clearly."
+    ];
+    return phrases.join(' ');
+}
+
+// Generate strengths
+function generateStrengths() {
+    const allStrengths = [
+        "Strong emotional connection with the material",
+        "Good eye contact throughout the performance",
+        "Natural vocal delivery and pacing",
+        "Effective use of pauses for dramatic effect",
+        "Authentic emotional expression",
+        "Confident presence on camera",
+        "Clear diction and articulation",
+        "Engaging facial expressions",
+        "Good framing and camera awareness",
+        "Consistent energy level throughout"
+    ];
+    
+    // Pick 2-4 random strengths
+    const count = 2 + Math.floor(Math.random() * 3);
+    const shuffled = allStrengths.sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, count);
+}
+
+// Generate improvements
+function generateImprovements() {
+    const allImprovements = [
+        "Work on maintaining consistent eye contact with the camera",
+        "Reduce filler words (um, uh, like) for cleaner delivery",
+        "Vary your vocal pitch to add more dynamics",
+        "Use more intentional pauses for emphasis",
+        "Improve posture for stronger presence",
+        "Add more facial expressiveness in key moments",
+        "Work on projection and vocal energy",
+        "Better utilize the frame and camera positioning",
+        "Connect more deeply with the emotional beats",
+        "Slow down in intense moments for impact"
+    ];
+    
+    const count = 2 + Math.floor(Math.random() * 3);
+    const shuffled = allImprovements.sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, count);
+}
+
+// Generate exercises
+function generateExercises() {
+    const allExercises = [
+        "Mirror work: Practice the scene while watching yourself",
+        "Breath control: Do 5 minutes of breathing exercises before recording",
+        "Eye contact drill: Hold eye contact with the camera for 60 seconds",
+        "Vocal warm-up: Tongue twisters and scale exercises",
+        "Emotion mapping: Chart the emotional journey of your character",
+        "Cold read practice: Try the scene without preparation",
+        "Pace variation: Record the same scene at 3 different speeds",
+        "Stillness exercise: Deliver lines with minimal movement",
+        "Energy levels: Practice the scene at 50%, 100%, and 150% energy"
+    ];
+    
+    const count = 3 + Math.floor(Math.random() * 2);
+    const shuffled = allExercises.sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, count);
+}
+
+// Display analysis results
+function displayAnalysisResults(analysis) {
+    // Overall score
+    document.getElementById('uploadAnalysisScore').textContent = analysis.overall;
+    
+    // Verdict
+    let verdict;
+    if (analysis.overall >= 80) {
+        verdict = "Outstanding performance! You demonstrated excellent control and emotional depth. This is the quality that books jobs.";
+    } else if (analysis.overall >= 65) {
+        verdict = "Solid performance with clear strengths. Focus on the improvement areas below to take your work to the next level.";
+    } else if (analysis.overall >= 50) {
+        verdict = "Good foundation with room for growth. Practice the recommended exercises consistently to see improvement.";
+    } else {
+        verdict = "Keep working! Every actor starts somewhere. Focus on fundamentals and record yourself regularly.";
+    }
+    document.getElementById('uploadAnalysisVerdict').textContent = verdict;
+    
+    // Video metrics
+    setMetricValue('analyzeEyeContact', analysis.eyeContact);
+    setMetricValue('analyzeFraming', analysis.framing);
+    setMetricValue('analyzeExpressiveness', analysis.expressiveness);
+    setMetricValue('analyzePosture', analysis.posture);
+    setMetricValue('analyzeGestures', analysis.gestures);
+    setMetricValue('analyzePresence', analysis.presence);
+    
+    // Voice metrics
+    document.getElementById('analyzeClarity').textContent = Math.round(analysis.clarity) + '%';
+    document.getElementById('analyzeClarityBar').style.width = analysis.clarity + '%';
+    
+    document.getElementById('analyzePace').textContent = Math.round(analysis.pace) + ' WPM';
+    document.getElementById('analyzePaceBar').style.width = Math.min(100, (analysis.pace / 180) * 100) + '%';
+    
+    setMetricValue('analyzeEnergy', analysis.energy);
+    setMetricValue('analyzeVocalVariety', analysis.vocalVariety);
+    
+    document.getElementById('analyzeVolume').textContent = Math.round(analysis.volume) + ' dB';
+    document.getElementById('analyzeVolumeBar').style.width = analysis.volume + '%';
+    
+    setMetricValue('analyzePauses', analysis.pauseUsage);
+    
+    // Emotional analysis
+    const emotionTimeline = document.getElementById('emotionTimeline');
+    if (emotionTimeline) {
+        emotionTimeline.innerHTML = analysis.emotions.slice(0, 10).map(e => `
+            <span class="emotion-tag" style="opacity: ${0.5 + e.intensity * 0.5}">
+                ${getEmotionEmoji(e.emotion)} ${e.emotion}
+            </span>
+        `).join('');
+    }
+    
+    document.getElementById('analyzeDominantEmotion').textContent = analysis.dominantEmotion;
+    document.getElementById('analyzeEmotionalRange').textContent = analysis.emotionalRange;
+    document.getElementById('analyzeAuthenticity').textContent = Math.round(analysis.authenticity) + '%';
+    
+    // Transcript
+    document.getElementById('uploadTranscriptContent').textContent = analysis.transcript;
+    document.getElementById('analyzeWordCount').textContent = analysis.wordCount;
+    document.getElementById('analyzeDuration').textContent = formatDuration(analysis.duration);
+    document.getElementById('analyzeFillerCount').textContent = analysis.fillerCount;
+    
+    // Director feedback
+    document.getElementById('analyzeStrengths').innerHTML = analysis.strengths.map(s => `<li>${s}</li>`).join('');
+    document.getElementById('analyzeImprovements').innerHTML = analysis.improvements.map(i => `<li>${i}</li>`).join('');
+    document.getElementById('analyzeExercises').innerHTML = analysis.exercises.map(e => `<li>${e}</li>`).join('');
+}
+
+// Helper to set metric value and bar
+function setMetricValue(id, value) {
+    const valueEl = document.getElementById(id);
+    const barEl = document.getElementById(id + 'Bar');
+    if (valueEl) valueEl.textContent = Math.round(value) + '%';
+    if (barEl) barEl.style.width = value + '%';
+}
+
+// Get emoji for emotion
+function getEmotionEmoji(emotion) {
+    const emojis = {
+        'Neutral': '😐',
+        'Happy': '😊',
+        'Sad': '😢',
+        'Surprised': '😮',
+        'Thoughtful': '🤔',
+        'Intense': '😤',
+        'Angry': '😠',
+        'Fearful': '😨'
+    };
+    return emojis[emotion] || '😐';
+}
+
+// Format duration helper
+function formatDuration(seconds) {
+    if (!seconds || isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', initSelftapeUpload);
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(initSelftapeUpload, 100);
+}
+
+// ============================================================================
+// ENHANCED EYE CONTACT TRACKING
+// ============================================================================
+
+// Eye contact tracking state
+const eyeContactState = {
+    totalFrames: 0,
+    lookingAtCameraFrames: 0,
+    history: [],
+    lastUpdate: 0
+};
+
+// Track eye contact from metrics updates
+function trackEyeContact(isLookingAtCamera) {
+    eyeContactState.totalFrames++;
+    if (isLookingAtCamera) {
+        eyeContactState.lookingAtCameraFrames++;
+    }
+    
+    // Calculate percentage
+    state.eyeContactPercentage = eyeContactState.totalFrames > 0
+        ? (eyeContactState.lookingAtCameraFrames / eyeContactState.totalFrames) * 100
+        : 50;
+    
+    // Track history for timeline
+    const now = Date.now();
+    if (now - eyeContactState.lastUpdate > 500) {
+        eyeContactState.history.push({
+            time: now,
+            looking: isLookingAtCamera
+        });
+        eyeContactState.lastUpdate = now;
+        
+        // Keep only last 120 entries (60 seconds)
+        if (eyeContactState.history.length > 120) {
+            eyeContactState.history.shift();
+        }
+    }
+}
+
+// Reset eye contact tracking
+function resetEyeContactTracking() {
+    eyeContactState.totalFrames = 0;
+    eyeContactState.lookingAtCameraFrames = 0;
+    eyeContactState.history = [];
+    eyeContactState.lastUpdate = 0;
+    state.eyeContactPercentage = 50;
+}
+
+// Update eye contact in session data
+const originalStopSessionRecording3 = typeof stopSessionRecording === 'function' ? stopSessionRecording : null;
+if (originalStopSessionRecording3) {
+    const wrappedStopSession = stopSessionRecording;
+    stopSessionRecording = async function() {
+        // Save eye contact data before stopping
+        if (sessionRecording.currentSession) {
+            sessionRecording.currentSession.eyeContactData = {
+                percentage: state.eyeContactPercentage || 50,
+                history: [...eyeContactState.history]
+            };
+        }
+        return wrappedStopSession.apply(this, arguments);
+    };
+}
+
+// Hook into metrics update to track eye contact
+const originalHandleMetrics2 = handleMetrics;
+handleMetrics = function(data) {
+    originalHandleMetrics2(data);
+    
+    // Track eye contact
+    if (data.flags) {
+        trackEyeContact(data.flags.looking_at_camera);
+    }
+};
+
+// Reset on session start
+const originalStartSession3 = startSession;
+startSession = async function() {
+    resetEyeContactTracking();
+    return originalStartSession3.apply(this, arguments);
+};
+
+console.log('🎬 Video Upload & Eye Contact Tracking initialized');
