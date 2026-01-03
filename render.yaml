@@ -1,0 +1,17 @@
+# Render.com deployment configuration
+services:
+  - type: web
+    name: scivora-ai-coach
+    env: python
+    region: oregon
+    plan: starter
+    buildCommand: pip install -r requirements-cloud.txt
+    startCommand: python server.py
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: DEPLOYMENT_MODE
+        value: cloud
+      - key: PORT
+        value: 8000
+    healthCheckPath: /

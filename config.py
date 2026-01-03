@@ -38,12 +38,12 @@ class DeploymentConfig:
     - Paid per usage, no GPU needed, works anywhere
     """
     
-    # "local" or "cloud"
-    MODE: str = "local"
+    # "local" or "cloud" - can also be set via DEPLOYMENT_MODE env var
+    MODE: str = os.environ.get("DEPLOYMENT_MODE", "local")
     
     # OpenAI API key (required for cloud mode)
     # Can also be set via OPENAI_API_KEY environment variable
-    OPENAI_API_KEY: Optional[str] = None
+    OPENAI_API_KEY: Optional[str] = os.environ.get("OPENAI_API_KEY")
     
     # Cloud model settings
     OPENAI_LLM_MODEL: str = "gpt-4o-mini"      # For coaching tips
@@ -219,8 +219,8 @@ class SessionConfig:
 class ServerConfig:
     """Server configuration."""
     HOST: str = "0.0.0.0"
-    PORT: int = 8000
-    DEBUG: bool = True
+    PORT: int = int(os.environ.get("PORT", 8000))  # Use PORT env var for cloud platforms
+    DEBUG: bool = os.environ.get("DEBUG", "false").lower() != "false"
     
     # WebSocket settings
     MAX_MESSAGE_SIZE: int = 10 * 1024 * 1024  # 10MB max message
