@@ -1,10 +1,80 @@
 """
 Configuration and tuning knobs for the Real-Time AI Coach.
 Adjust these parameters based on your hardware and latency requirements.
+
+DEPLOYMENT MODES:
+1. LOCAL (default): Uses GPU for all AI models - free, private, fast
+2. CLOUD: Uses OpenAI APIs - works online, no GPU needed, costs money
+
+To switch modes:
+- Set DEPLOYMENT_MODE = "cloud" 
+- Set OPENAI_API_KEY environment variable
 """
 
+import os
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
+
+
+# ============================================================================
+# DEPLOYMENT CONFIGURATION
+# ============================================================================
+
+@dataclass
+class DeploymentConfig:
+    """
+    Deployment mode configuration.
+    
+    LOCAL mode (default):
+    - Uses Ollama for LLM tips
+    - Uses faster-whisper for ASR (GPU)
+    - Uses SpeechBrain for emotion (GPU)
+    - Free, private, requires GPU
+    
+    CLOUD mode:
+    - Uses OpenAI GPT-4o-mini for LLM tips
+    - Uses OpenAI Whisper API for ASR
+    - Uses GPT-4 Vision for face analysis (optional)
+    - Paid per usage, no GPU needed, works anywhere
+    """
+    
+    # "local" or "cloud"
+    MODE: str = "local"
+    
+    # OpenAI API key (required for cloud mode)
+    # Can also be set via OPENAI_API_KEY environment variable
+    OPENAI_API_KEY: Optional[str] = None
+    
+    # Cloud model settings
+    OPENAI_LLM_MODEL: str = "gpt-4o-mini"      # For coaching tips
+    OPENAI_ASR_MODEL: str = "whisper-1"        # For transcription
+    OPENAI_VISION_MODEL: str = "gpt-4o"        # For face analysis
+    
+    # Use GPT-4 Vision for face emotion (more accurate than MediaPipe)
+    USE_VISION_FOR_EMOTION: bool = False
+    
+    # ASR buffer duration for cloud (longer = better accuracy, more latency)
+    CLOUD_ASR_BUFFER_SEC: float = 3.0
+    
+    def __post_init__(self):
+        """Load API key from environment if not set."""
+        if not self.OPENAI_API_KEY:
+            self.OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+    
+    @property
+    def is_cloud(self) -> bool:
+        """Check if running in cloud mode."""
+        return self.MODE.lower() == "cloud"
+    
+    @property
+    def is_local(self) -> bool:
+        """Check if running in local mode."""
+        return self.MODE.lower() == "local"
+    
+    @property
+    def has_api_key(self) -> bool:
+        """Check if OpenAI API key is available."""
+        return bool(self.OPENAI_API_KEY)
 
 @dataclass
 class AudioConfig:
@@ -156,8 +226,17 @@ class ServerConfig:
     MAX_MESSAGE_SIZE: int = 10 * 1024 * 1024  # 10MB max message
     HEARTBEAT_INTERVAL_SEC: float = 30.0
 
-# Global config instance
+# ============================================================================
+# GLOBAL CONFIG INSTANCE
+# ============================================================================
+
 class Config:
+    """Global configuration singleton."""
+    
+    # Deployment mode (local vs cloud)
+    deployment = DeploymentConfig()
+    
+    # Individual pipeline configs
     audio = AudioConfig()
     vision = VisionConfig()
     asr = ASRConfig()
@@ -166,6 +245,71 @@ class Config:
     emotion = EmotionConfig()
     session = SessionConfig()
     server = ServerConfig()
+    
+    @classmethod
+    def set_cloud_mode(cls, api_key: str = None):
+        """
+        Switch to cloud deployment mode.
+        
+        Args:
+            api_key: OpenAI API key (optional if OPENAI_API_KEY env var is set)
+        """
+        cls.deployment.MODE = "cloud"
+        if api_key:
+            cls.deployment.OPENAI_API_KEY = api_key
+        
+        # Adjust settings for cloud
+        cls.coach.USE_LLM = True
+        cls.asr.DEVICE = "cpu"  # No GPU needed
+        cls.emotion.DEVICE = "cpu"
+        
+        print(f"✅ Switched to CLOUD mode")
+        print(f"   LLM: OpenAI {cls.deployment.OPENAI_LLM_MODEL}")
+        print(f"   ASR: OpenAI {cls.deployment.OPENAI_ASR_MODEL}")
+    
+    @classmethod
+    def set_local_mode(cls):
+        """Switch to local deployment mode (default)."""
+        cls.deployment.MODE = "local"
+        cls.asr.DEVICE = "cuda"
+        cls.emotion.DEVICE = "cuda"
+        
+        print(f"✅ Switched to LOCAL mode")
+        print(f"   LLM: Ollama {cls.coach.OLLAMA_MODEL}")
+        print(f"   ASR: faster-whisper (GPU)")
+
 
 config = Config()
+
+
+# ============================================================================
+# QUICK SETUP HELPERS
+# ============================================================================
+
+def setup_for_cloud(api_key: str = None):
+    """
+    Quick setup for cloud deployment.
+    
+    Usage:
+        from config import setup_for_cloud
+        setup_for_cloud("sk-your-api-key")
+    
+    Or set OPENAI_API_KEY environment variable first:
+        export OPENAI_API_KEY="sk-your-api-key"
+        
+        from config import setup_for_cloud
+        setup_for_cloud()
+    """
+    config.set_cloud_mode(api_key)
+
+
+def setup_for_local():
+    """
+    Quick setup for local deployment (default).
+    
+    Requires:
+    - CUDA-enabled GPU
+    - Ollama running with llama3.2
+    """
+    config.set_local_mode()
 

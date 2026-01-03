@@ -26,25 +26,27 @@ from pydantic import BaseModel
 from config import config
 from audio_pipeline import AudioPipeline, AudioFeatures
 from vision_pipeline import VisionPipeline, VisionFeatures
-from asr_pipeline import ASRPipeline
 from fusion_engine import FusionEngine, FusedMetrics
 from coach_engine import CoachEngine, CoachingTip
 from session_recorder import SessionRecorder
 
-# New: Emotion and LLM modules
+# ASR Pipeline - will be loaded dynamically in load_models()
+# based on deployment mode (local vs cloud)
+from asr_pipeline import ASRPipeline
+
+# Emotion Engine (optional)
 try:
     from emotion_engine import EmotionEngine, EmotionResult
     HAS_EMOTION = True
 except ImportError:
     HAS_EMOTION = False
-    logger.warning("Emotion engine not available")
 
+# LLM Coach - supports both Ollama and OpenAI
 try:
-    from llm_coach import LLMCoach, LLMCoachingTip
+    from llm_coach import LLMCoach, LLMCoachingTip, VisionLLMCoach
     HAS_LLM = True
 except ImportError:
     HAS_LLM = False
-    logger.warning("LLM coach not available")
 
 # Configure logging
 logging.basicConfig(
@@ -168,53 +170,90 @@ def load_models():
     if _models_loaded:
         return
     
+    is_cloud = config.deployment.is_cloud
+    
     logger.info("=" * 50)
-    logger.info("Loading AI models (this may take a moment)...")
+    logger.info(f"Loading AI models ({config.deployment.MODE.upper()} mode)...")
     logger.info("=" * 50)
     
-    # Vision pipeline
+    # Vision pipeline (MediaPipe - works on CPU too)
     try:
         _global_vision = VisionPipeline()
-        logger.info("✓ Vision pipeline loaded")
+        logger.info("✓ Vision pipeline loaded (MediaPipe)")
     except Exception as e:
         logger.warning(f"✗ Vision pipeline failed: {e}")
         _global_vision = None
     
-    # ASR pipeline
+    # ASR pipeline - Cloud or Local
     try:
-        _global_asr = ASRPipeline()
-        logger.info("✓ ASR pipeline loaded")
+        if is_cloud:
+            from cloud_asr import CloudASRPipeline
+            _global_asr = CloudASRPipeline(
+                api_key=config.deployment.OPENAI_API_KEY,
+                buffer_duration=config.deployment.CLOUD_ASR_BUFFER_SEC
+            )
+            logger.info(f"✓ ASR pipeline loaded (OpenAI Whisper)")
+        else:
+            from asr_pipeline import ASRPipeline
+            _global_asr = ASRPipeline()
+            logger.info("✓ ASR pipeline loaded (faster-whisper GPU)")
     except Exception as e:
         logger.warning(f"✗ ASR pipeline failed: {e}")
         _global_asr = None
     
-    # Emotion engine (optional)
-    if HAS_EMOTION:
+    # Emotion engine (optional) - only for local mode
+    if HAS_EMOTION and not is_cloud:
         try:
+            device = config.emotion.DEVICE if hasattr(config.emotion, 'DEVICE') else "cuda"
             _global_emotion = EmotionEngine(
-                use_audio_emotion=config.emotion.USE_AUDIO_EMOTION if hasattr(config, 'emotion') else True,
-                use_face_emotion=config.emotion.USE_FACE_EMOTION if hasattr(config, 'emotion') else False,
-                use_text_emotion=config.emotion.USE_TEXT_EMOTION if hasattr(config, 'emotion') else True,
-                device="cuda"
+                use_audio_emotion=config.emotion.USE_AUDIO_EMOTION,
+                use_face_emotion=config.emotion.USE_FACE_EMOTION,
+                use_text_emotion=config.emotion.USE_TEXT_EMOTION,
+                device=device
             )
-            logger.info("✓ Emotion engine initialized")
+            logger.info("✓ Emotion engine initialized (SpeechBrain + GoEmotions)")
         except Exception as e:
             logger.warning(f"✗ Emotion engine failed: {e}")
             _global_emotion = None
+    elif is_cloud:
+        logger.info("⏭ Emotion engine skipped (cloud mode uses LLM for analysis)")
+        _global_emotion = None
     
-    # LLM coach (optional)
+    # LLM coach - Ollama (local) or OpenAI (cloud)
     if HAS_LLM:
         try:
-            model_name = config.coach.OLLAMA_MODEL if hasattr(config.coach, 'OLLAMA_MODEL') else "llama3.2"
-            _global_llm = LLMCoach(model=model_name)
-            logger.info(f"✓ LLM coach initialized (model: {model_name})")
+            if is_cloud:
+                # Use OpenAI API
+                if config.deployment.USE_VISION_FOR_EMOTION:
+                    _global_llm = VisionLLMCoach(
+                        api_key=config.deployment.OPENAI_API_KEY,
+                        model=config.deployment.OPENAI_VISION_MODEL
+                    )
+                    logger.info(f"✓ LLM coach initialized (OpenAI {config.deployment.OPENAI_VISION_MODEL} with Vision)")
+                else:
+                    _global_llm = LLMCoach(
+                        backend="openai",
+                        model=config.deployment.OPENAI_LLM_MODEL,
+                        api_key=config.deployment.OPENAI_API_KEY
+                    )
+                    logger.info(f"✓ LLM coach initialized (OpenAI {config.deployment.OPENAI_LLM_MODEL})")
+            else:
+                # Use local Ollama
+                model_name = config.coach.OLLAMA_MODEL
+                _global_llm = LLMCoach(backend="ollama", model=model_name)
+                logger.info(f"✓ LLM coach initialized (Ollama {model_name})")
         except Exception as e:
             logger.warning(f"✗ LLM coach failed: {e}")
             _global_llm = None
     
     _models_loaded = True
     logger.info("=" * 50)
-    logger.info("Model loading complete!")
+    if is_cloud:
+        logger.info("☁️  CLOUD MODE - Using OpenAI APIs")
+        if not config.deployment.has_api_key:
+            logger.warning("⚠️  OPENAI_API_KEY not set! LLM and ASR won't work.")
+    else:
+        logger.info("🖥️  LOCAL MODE - Using GPU-accelerated models")
     logger.info("=" * 50)
 
 # ============================================================================

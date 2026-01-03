@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎭 Scivora - Perfect Every Performance</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/styles.css?v=3">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -31,6 +31,10 @@
                     <span class="tab-icon">📹</span>
                     <span class="tab-name">Self-Tape</span>
                 </button>
+                <button class="tab-btn" data-tab="history">
+                    <span class="tab-icon">📊</span>
+                    <span class="tab-name">Sessions</span>
+                </button>
                 <button class="tab-btn" data-tab="coaches">
                     <span class="tab-icon">🏆</span>
                     <span class="tab-name">Coaches</span>
@@ -45,6 +49,53 @@
                 </div>
             </div>
         </header>
+
+        <!-- ================================================================ -->
+        <!-- SCRIPT TELEPROMPTER PANEL (Collapsible) -->
+        <!-- ================================================================ -->
+        <aside class="script-panel" id="scriptPanel">
+            <div class="script-panel-header">
+                <h3>📜 Script</h3>
+                <div class="script-controls">
+                    <button class="script-btn" id="prevScriptBtn" title="Previous Script">◀</button>
+                    <span id="scriptCounter">1 / 10</span>
+                    <button class="script-btn" id="nextScriptBtn" title="Next Script">▶</button>
+                    <button class="script-btn" id="toggleScriptBtn" title="Hide Script">✕</button>
+                </div>
+            </div>
+            <div class="script-selector">
+                <select id="scriptCategory">
+                    <option value="monologues">🎭 Monologues</option>
+                    <option value="scenes">👥 Two-Person Scenes</option>
+                    <option value="audition">🎬 Audition Sides</option>
+                    <option value="commercial">📺 Commercials</option>
+                    <option value="shakespeare">📚 Shakespeare</option>
+                </select>
+                <select id="scriptIntensity">
+                    <option value="intimate">🤫 Intimate</option>
+                    <option value="neutral">😐 Neutral</option>
+                    <option value="heightened">😢 Heightened</option>
+                    <option value="intense">😤 Intense</option>
+                </select>
+            </div>
+            <div class="script-info">
+                <h4 id="scriptTitle">The Letter</h4>
+                <p id="scriptContext">A person reading a letter from someone they've lost</p>
+            </div>
+            <div class="script-content" id="scriptContent">
+                <!-- Script text will be loaded here -->
+            </div>
+            <div class="script-tips">
+                <h5>💡 Director's Tips</h5>
+                <ul id="scriptTips">
+                    <!-- Tips will be loaded here -->
+                </ul>
+            </div>
+        </aside>
+
+        <button class="show-script-btn" id="showScriptBtn" title="Show Script Panel">
+            📜 Script
+        </button>
 
         <!-- ================================================================ -->
         <!-- TAB 1: REAL-TIME FEEDBACK (Actor's Coach) -->
@@ -326,6 +377,236 @@
                             <p class="transcript-placeholder">Your performance will be transcribed here in real-time...</p>
                         </div>
                     </div>
+
+                    <!-- Director's Analysis Panel -->
+                    <div class="analysis-panel" id="analysisPanel">
+                        <div class="analysis-header">
+                            <h3>🎬 Director's Analysis</h3>
+                            <div class="analysis-tabs">
+                                <button class="analysis-tab active" data-analysis="comparison">📊 Script Comparison</button>
+                                <button class="analysis-tab" data-analysis="grammar">✍️ Grammar</button>
+                                <button class="analysis-tab" data-analysis="fillers">📈 Filler Words</button>
+                                <button class="analysis-tab" data-analysis="metrics">🎯 Pro Metrics</button>
+                            </div>
+                        </div>
+
+                        <!-- Script Comparison Tab -->
+                        <div class="analysis-content active" id="analysisComparison">
+                            <div class="comparison-stats">
+                                <div class="comp-stat">
+                                    <span class="comp-value" id="accuracyScore">--%</span>
+                                    <span class="comp-label">Accuracy</span>
+                                </div>
+                                <div class="comp-stat">
+                                    <span class="comp-value" id="missedWords">--</span>
+                                    <span class="comp-label">Missed Words</span>
+                                </div>
+                                <div class="comp-stat">
+                                    <span class="comp-value" id="addedWords">--</span>
+                                    <span class="comp-label">Added/Improvised</span>
+                                </div>
+                                <div class="comp-stat">
+                                    <span class="comp-value" id="wordOrderScore">--%</span>
+                                    <span class="comp-label">Word Order</span>
+                                </div>
+                            </div>
+                            <div class="comparison-view" id="comparisonView">
+                                <div class="comparison-legend">
+                                    <span class="legend-item"><span class="legend-color correct"></span> Correct</span>
+                                    <span class="legend-item"><span class="legend-color missed"></span> Missed</span>
+                                    <span class="legend-item"><span class="legend-color added"></span> Added/Improvised</span>
+                                    <span class="legend-item"><span class="legend-color wrong"></span> Wrong Word</span>
+                                </div>
+                                <div class="script-comparison" id="scriptComparisonText">
+                                    <p class="comparison-placeholder">Select a script from the panel and start rehearsing to see comparison...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Grammar Analysis Tab -->
+                        <div class="analysis-content" id="analysisGrammar">
+                            <div class="grammar-stats">
+                                <div class="grammar-score">
+                                    <span class="score-circle" id="grammarScoreCircle">
+                                        <span id="grammarScoreValue">--</span>
+                                    </span>
+                                    <span class="score-label">Grammar Score</span>
+                                </div>
+                                <div class="grammar-breakdown">
+                                    <div class="grammar-item">
+                                        <span class="grammar-icon">🗣️</span>
+                                        <span class="grammar-name">Pronunciation</span>
+                                        <div class="grammar-bar"><div class="grammar-fill" id="pronunciationBar"></div></div>
+                                        <span class="grammar-value" id="pronunciationValue">--</span>
+                                    </div>
+                                    <div class="grammar-item">
+                                        <span class="grammar-icon">📐</span>
+                                        <span class="grammar-name">Sentence Structure</span>
+                                        <div class="grammar-bar"><div class="grammar-fill" id="structureBar"></div></div>
+                                        <span class="grammar-value" id="structureValue">--</span>
+                                    </div>
+                                    <div class="grammar-item">
+                                        <span class="grammar-icon">🎯</span>
+                                        <span class="grammar-name">Word Choice</span>
+                                        <div class="grammar-bar"><div class="grammar-fill" id="wordChoiceBar"></div></div>
+                                        <span class="grammar-value" id="wordChoiceValue">--</span>
+                                    </div>
+                                    <div class="grammar-item">
+                                        <span class="grammar-icon">⏱️</span>
+                                        <span class="grammar-name">Tense Consistency</span>
+                                        <div class="grammar-bar"><div class="grammar-fill" id="tenseBar"></div></div>
+                                        <span class="grammar-value" id="tenseValue">--</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="grammar-issues" id="grammarIssues">
+                                <h4>🔍 Issues Found</h4>
+                                <div class="issues-list" id="issuesList">
+                                    <p class="no-issues">No issues detected yet. Start speaking to analyze...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filler Words Graph Tab -->
+                        <div class="analysis-content" id="analysisFillers">
+                            <div class="fillers-overview">
+                                <div class="filler-total">
+                                    <span class="filler-count" id="totalFillerCount">0</span>
+                                    <span class="filler-label">Total Fillers</span>
+                                </div>
+                                <div class="filler-rate">
+                                    <span class="filler-count" id="fillerRate">0%</span>
+                                    <span class="filler-label">Filler Rate</span>
+                                </div>
+                                <div class="filler-trend">
+                                    <span class="filler-count" id="fillerTrend">→</span>
+                                    <span class="filler-label">Trend</span>
+                                </div>
+                            </div>
+                            <div class="fillers-chart-container">
+                                <canvas id="fillersChart" width="400" height="150"></canvas>
+                            </div>
+                            <div class="fillers-breakdown">
+                                <h4>📊 Filler Breakdown</h4>
+                                <div class="filler-bars" id="fillerBars">
+                                    <!-- Filler bars will be dynamically added -->
+                                </div>
+                            </div>
+                            <div class="fillers-timeline">
+                                <h4>⏱️ Timeline</h4>
+                                <div class="timeline-display" id="fillerTimeline">
+                                    <p class="timeline-placeholder">Filler word occurrences will appear here...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Professional Metrics Tab -->
+                        <div class="analysis-content" id="analysisMetrics">
+                            <div class="pro-metrics-grid">
+                                <div class="pro-metric">
+                                    <div class="pro-metric-header">
+                                        <span class="pro-icon">🎭</span>
+                                        <span class="pro-name">Emotional Arc</span>
+                                    </div>
+                                    <div class="arc-visualization" id="emotionalArc">
+                                        <canvas id="emotionalArcCanvas" width="200" height="60"></canvas>
+                                    </div>
+                                    <span class="pro-desc">How your emotions evolved during the performance</span>
+                                </div>
+                                <div class="pro-metric">
+                                    <div class="pro-metric-header">
+                                        <span class="pro-icon">🎵</span>
+                                        <span class="pro-name">Vocal Variety</span>
+                                    </div>
+                                    <div class="variety-bars">
+                                        <div class="variety-item">
+                                            <span>Pitch Range</span>
+                                            <div class="variety-bar"><div class="variety-fill" id="pitchRangeBar"></div></div>
+                                            <span id="pitchRangeValue">--</span>
+                                        </div>
+                                        <div class="variety-item">
+                                            <span>Volume Dynamics</span>
+                                            <div class="variety-bar"><div class="variety-fill" id="volumeDynamicsBar"></div></div>
+                                            <span id="volumeDynamicsValue">--</span>
+                                        </div>
+                                        <div class="variety-item">
+                                            <span>Tempo Changes</span>
+                                            <div class="variety-bar"><div class="variety-fill" id="tempoChangesBar"></div></div>
+                                            <span id="tempoChangesValue">--</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="pro-metric">
+                                    <div class="pro-metric-header">
+                                        <span class="pro-icon">👁️</span>
+                                        <span class="pro-name">Camera Presence</span>
+                                    </div>
+                                    <div class="presence-stats">
+                                        <div class="presence-item">
+                                            <span class="presence-value" id="eyeContactTime">--%</span>
+                                            <span class="presence-label">Eye Contact</span>
+                                        </div>
+                                        <div class="presence-item">
+                                            <span class="presence-value" id="framingScore">--</span>
+                                            <span class="presence-label">Framing</span>
+                                        </div>
+                                        <div class="presence-item">
+                                            <span class="presence-value" id="movementScore">--</span>
+                                            <span class="presence-label">Stillness</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="pro-metric">
+                                    <div class="pro-metric-header">
+                                        <span class="pro-icon">⚡</span>
+                                        <span class="pro-name">Energy Distribution</span>
+                                    </div>
+                                    <div class="energy-graph">
+                                        <canvas id="energyGraphCanvas" width="200" height="60"></canvas>
+                                    </div>
+                                    <div class="energy-stats">
+                                        <span>Avg: <strong id="avgEnergy">--</strong></span>
+                                        <span>Peak: <strong id="peakEnergy">--</strong></span>
+                                        <span>Low: <strong id="lowEnergy">--</strong></span>
+                                    </div>
+                                </div>
+                                <div class="pro-metric">
+                                    <div class="pro-metric-header">
+                                        <span class="pro-icon">⏸️</span>
+                                        <span class="pro-name">Pause Analysis</span>
+                                    </div>
+                                    <div class="pause-stats">
+                                        <div class="pause-item">
+                                            <span class="pause-value" id="totalPauses">--</span>
+                                            <span class="pause-label">Total Pauses</span>
+                                        </div>
+                                        <div class="pause-item">
+                                            <span class="pause-value" id="avgPauseDuration">--s</span>
+                                            <span class="pause-label">Avg Duration</span>
+                                        </div>
+                                        <div class="pause-item">
+                                            <span class="pause-value" id="dramaticPauses">--</span>
+                                            <span class="pause-label">Dramatic</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="pro-metric">
+                                    <div class="pro-metric-header">
+                                        <span class="pro-icon">🎬</span>
+                                        <span class="pro-name">Take Quality</span>
+                                    </div>
+                                    <div class="take-quality">
+                                        <div class="quality-meter">
+                                            <div class="quality-fill" id="takeQualityFill"></div>
+                                        </div>
+                                        <div class="quality-verdict" id="takeQualityVerdict">
+                                            Waiting for performance...
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </section>
             </div>
         </main>
@@ -450,7 +731,169 @@ SARAH: Then what did you mean?"></textarea>
         </main>
 
         <!-- ================================================================ -->
-        <!-- TAB 3: OTHER COACHES -->
+        <!-- TAB 3: SESSION HISTORY -->
+        <!-- ================================================================ -->
+        <main class="tab-content" id="tab-history">
+            <div class="history-layout">
+                <!-- Hero Section with Stats -->
+                <div class="history-hero">
+                    <div class="hero-stats">
+                        <div class="stat-card">
+                            <span class="stat-value" id="totalSessions">0</span>
+                            <span class="stat-label">Total Sessions</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-value" id="totalTime">0:00</span>
+                            <span class="stat-label">Practice Time</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-value" id="avgScore">--</span>
+                            <span class="stat-label">Avg Score</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-value" id="improvement">--</span>
+                            <span class="stat-label">Improvement</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Chart -->
+                <div class="progress-section">
+                    <div class="section-title">
+                        <span class="title-icon">📈</span>
+                        <h2>Your Progress</h2>
+                        <div class="chart-filters">
+                            <button class="filter-btn active" data-range="week">Week</button>
+                            <button class="filter-btn" data-range="month">Month</button>
+                            <button class="filter-btn" data-range="all">All Time</button>
+                        </div>
+                    </div>
+                    <div class="progress-chart" id="progressChart">
+                        <canvas id="progressCanvas"></canvas>
+                        <div class="chart-placeholder" id="chartPlaceholder">
+                            <span class="placeholder-icon">📊</span>
+                            <p>Complete a few sessions to see your progress chart!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Session List -->
+                <div class="sessions-section">
+                    <div class="section-title">
+                        <span class="title-icon">🎬</span>
+                        <h2>Session History</h2>
+                        <div class="session-actions">
+                            <button class="btn btn-small btn-secondary" id="exportSessionsBtn">
+                                <span>📥</span> Export All
+                            </button>
+                            <button class="btn btn-small btn-danger" id="clearSessionsBtn">
+                                <span>🗑️</span> Clear All
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="sessions-grid" id="sessionsGrid">
+                        <!-- Sessions will be populated here -->
+                        <div class="empty-sessions" id="emptySessions">
+                            <span class="empty-icon">🎭</span>
+                            <h3>No Sessions Yet</h3>
+                            <p>Start a rehearsal session to see your performance history here.</p>
+                            <button class="btn btn-primary" onclick="document.querySelector('[data-tab=realtime]').click()">
+                                <span class="btn-icon">▶</span>
+                                Start First Session
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Session Detail Modal -->
+        <div class="modal hidden" id="sessionDetailModal">
+            <div class="modal-content session-detail-modal">
+                <div class="modal-header">
+                    <h2 id="sessionDetailTitle">📊 Session Analysis</h2>
+                    <button class="modal-close" id="closeSessionDetailBtn">&times;</button>
+                </div>
+                <div class="modal-body" id="sessionDetailContent">
+                    <!-- Session Video and Analysis -->
+                    <div class="session-detail-layout">
+                        <!-- Video Section -->
+                        <div class="session-video-section">
+                            <div class="video-player-container">
+                                <video id="sessionVideo" controls></video>
+                                <div class="video-no-recording" id="videoNoRecording">
+                                    <span class="no-video-icon">📹</span>
+                                    <p>No video recorded for this session</p>
+                                </div>
+                            </div>
+                            <div class="video-timeline">
+                                <div class="timeline-bar" id="sessionTimeline">
+                                    <div class="timeline-markers" id="sessionTimelineMarkers"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Analysis Section -->
+                        <div class="session-analysis-section">
+                            <!-- Performance Summary -->
+                            <div class="analysis-card">
+                                <h3>🎯 Performance Summary</h3>
+                                <div class="summary-score-large">
+                                    <div class="score-circle" id="detailScoreCircle">
+                                        <span class="score-number" id="detailScore">--</span>
+                                    </div>
+                                    <div class="score-breakdown" id="detailBreakdown">
+                                        <!-- Score breakdown will be populated -->
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- AI Director's Report -->
+                            <div class="analysis-card director-report">
+                                <h3>🎬 Director's Analysis</h3>
+                                <div class="director-content" id="directorReport">
+                                    <div class="report-loading">
+                                        <span class="loading-spinner">🎬</span>
+                                        <p>Generating analysis...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Live Notes from Session -->
+                            <div class="analysis-card">
+                                <h3>📝 Session Notes</h3>
+                                <div class="session-notes-list" id="sessionNotesList">
+                                    <!-- Notes will be populated -->
+                                </div>
+                            </div>
+                            
+                            <!-- Transcript -->
+                            <div class="analysis-card">
+                                <h3>📜 Transcript</h3>
+                                <div class="session-transcript" id="sessionTranscript">
+                                    <!-- Transcript will be populated -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" id="deleteSessionBtn">
+                        <span class="btn-icon">🗑️</span> Delete Session
+                    </button>
+                    <button class="btn btn-secondary" id="downloadSessionBtn">
+                        <span class="btn-icon">📥</span> Download
+                    </button>
+                    <button class="btn btn-primary" id="reanalyzeSessionBtn">
+                        <span class="btn-icon">🔄</span> Re-Analyze
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================ -->
+        <!-- TAB 4: OTHER COACHES -->
         <!-- ================================================================ -->
         <main class="tab-content" id="tab-coaches">
             <div class="coaches-layout">
@@ -618,6 +1061,6 @@ SARAH: Then what did you mean?"></textarea>
         </div>
     </div>
 
-    <script src="/static/client.js"></script>
+    <script src="/static/client.js?v=7"></script>
 </body>
 </html>
