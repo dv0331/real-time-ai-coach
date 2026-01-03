@@ -10,8 +10,8 @@
 // ============================================================================
 
 const CONFIG = {
-    // WebSocket
-    WS_URL: `ws://${window.location.host}/ws`,
+    // WebSocket - Auto-detect protocol (ws:// for HTTP, wss:// for HTTPS)
+    WS_URL: `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`,
     RECONNECT_DELAY: 2000,
     
     // Audio capture
@@ -1331,28 +1331,48 @@ updateMetrics = function(data) {
 const tabs = document.querySelectorAll('.tab-btn');
 const tabContents = document.querySelectorAll('.tab-content');
 
+// Global switchTab function (can be called from HTML onclick)
+function switchTab(targetTab) {
+    const tabs = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    // Update active tab button
+    tabs.forEach(t => {
+        t.classList.remove('active');
+        if (t.dataset.tab === targetTab) {
+            t.classList.add('active');
+        }
+    });
+    
+    // Show target content
+    tabContents.forEach(content => {
+        content.classList.remove('active');
+        if (content.id === `tab-${targetTab}`) {
+            content.classList.add('active');
+        }
+    });
+    
+    // Initialize self-tape preview if switching to that tab
+    if (targetTab === 'selftape') {
+        initSelftapePreview();
+    }
+    
+    // Load session history if switching to history tab
+    if (targetTab === 'history') {
+        if (typeof loadSessionHistory === 'function') {
+            loadSessionHistory();
+        }
+    }
+    
+    console.log(`📑 Switched to tab: ${targetTab}`);
+}
+
+// Make switchTab available globally
+window.switchTab = switchTab;
+
 tabs.forEach(tab => {
     tab.addEventListener('click', () => {
-        const targetTab = tab.dataset.tab;
-        
-        // Update active tab button
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        
-        // Show target content
-        tabContents.forEach(content => {
-            content.classList.remove('active');
-            if (content.id === `tab-${targetTab}`) {
-                content.classList.add('active');
-            }
-        });
-        
-        // Initialize self-tape preview if switching to that tab
-        if (targetTab === 'selftape') {
-            initSelftapePreview();
-        }
-        
-        console.log(`📑 Switched to tab: ${targetTab}`);
+        switchTab(tab.dataset.tab);
     });
 });
 
