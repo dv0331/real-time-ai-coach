@@ -4,13 +4,19 @@ Implements EMA smoothing and hysteresis to prevent metric flicker.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 import time
 import logging
 
 from config import config
-from audio_pipeline import AudioFeatures
-from vision_pipeline import VisionFeatures
+
+# Conditional imports based on deployment mode
+if config.deployment.is_cloud:
+    AudioFeatures = None
+    VisionFeatures = None
+else:
+    from audio_pipeline import AudioFeatures
+    from vision_pipeline import VisionFeatures
 
 logger = logging.getLogger(__name__)
 
@@ -82,8 +88,8 @@ class FusionEngine:
     
     def update(
         self,
-        audio_features: Optional[AudioFeatures] = None,
-        vision_features: Optional[VisionFeatures] = None,
+        audio_features: Optional[Any] = None,
+        vision_features: Optional[Any] = None,
         filler_count: int = 0,
         word_count: int = 0
     ) -> FusedMetrics:
