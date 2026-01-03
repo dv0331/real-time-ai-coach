@@ -3367,6 +3367,144 @@ body {
     color: var(--accent-gold);
 }
 
+/* Detailed Analysis Sections in Session Detail */
+.report-section.detailed-section {
+    background: rgba(255, 255, 255, 0.03);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: var(--space-md);
+}
+
+.report-section.detailed-section h4 {
+    margin-bottom: var(--space-md);
+}
+
+/* Filler Words in Session Detail */
+.filler-stats {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.filler-count {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--warning);
+}
+
+.filler-rate {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.filler-breakdown {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin-top: var(--space-sm);
+}
+
+.filler-tag {
+    background: rgba(255, 193, 7, 0.2);
+    color: var(--warning);
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 0.8rem;
+    font-family: 'SF Mono', monospace;
+}
+
+/* Grammar Issues in Session Detail */
+.grammar-count {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: var(--space-sm);
+}
+
+.grammar-issue {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-xs);
+    font-size: 0.85rem;
+}
+
+.grammar-issue .issue-icon {
+    flex-shrink: 0;
+}
+
+.grammar-issue .issue-text {
+    color: var(--text-secondary);
+}
+
+.grammar-issue.error {
+    border-left: 3px solid var(--error);
+}
+
+.grammar-issue.warning {
+    border-left: 3px solid var(--warning);
+}
+
+/* Script Comparison in Session Detail */
+.comparison-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-sm);
+}
+
+.comparison-stats .stat {
+    text-align: center;
+    padding: var(--space-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-sm);
+}
+
+.comparison-stats .stat .value {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+}
+
+.comparison-stats .stat .label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+/* Pause Analysis in Session Detail */
+.pause-stats {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.pause-stat {
+    text-align: center;
+}
+
+.pause-stat .value {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent-cyan);
+}
+
+.pause-stat .label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.no-data {
+    color: var(--success);
+    font-style: italic;
+    font-size: 0.85rem;
+}
+
 /* Session Notes List */
 .session-notes-list {
     max-height: 200px;

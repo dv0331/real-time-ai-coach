@@ -1938,6 +1938,19 @@ async function stopSessionRecording() {
     sessionRecording.currentSession.notes = [...sessionRecording.notes];
     sessionRecording.currentSession.metricsHistory = [...sessionRecording.metricsHistory];
     
+    // Save detailed Director's Analysis data
+    sessionRecording.currentSession.directorAnalysisData = {
+        fillerWords: { ...directorAnalysis.fillerWords },
+        fillerTimeline: [...directorAnalysis.fillerTimeline],
+        grammarIssues: [...directorAnalysis.grammarIssues],
+        emotionalHistory: [...directorAnalysis.emotionalHistory],
+        energyHistory: [...directorAnalysis.energyHistory],
+        pauseHistory: [...directorAnalysis.pauseHistory],
+        scriptWords: [...directorAnalysis.scriptWords],
+        transcriptWords: [...directorAnalysis.transcriptWords],
+        comparisonResults: directorAnalysis.comparisonResults ? { ...directorAnalysis.comparisonResults } : null
+    };
+    
     // Save to database
     await saveSession(sessionRecording.currentSession, sessionRecording.recordedChunks);
     
@@ -2384,11 +2397,67 @@ async function generateDirectorAnalysis(session) {
     
     // Analyze the session
     const analysis = analyzePerformance(session);
+    const detailedData = session.directorAnalysisData || {};
     
     // Simulate AI thinking time for dramatic effect
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Render the report
+    // Calculate detailed metrics
+    const totalFillers = detailedData.fillerWords 
+        ? Object.values(detailedData.fillerWords).reduce((a, b) => a + b, 0) 
+        : 0;
+    const totalWords = detailedData.transcriptWords?.length || 0;
+    const fillerRate = totalWords > 0 ? ((totalFillers / totalWords) * 100).toFixed(1) : '0';
+    const grammarIssues = detailedData.grammarIssues || [];
+    const comparison = detailedData.comparisonResults;
+    const pauseHistory = detailedData.pauseHistory || [];
+    
+    // Build filler words breakdown
+    let fillerBreakdown = '';
+    if (detailedData.fillerWords && Object.keys(detailedData.fillerWords).length > 0) {
+        const sortedFillers = Object.entries(detailedData.fillerWords)
+            .filter(([_, count]) => count > 0)
+            .sort((a, b) => b[1] - a[1]);
+        fillerBreakdown = sortedFillers.map(([word, count]) => 
+            `<span class="filler-tag">"${word}" × ${count}</span>`
+        ).join(' ');
+    }
+    
+    // Build grammar issues list
+    let grammarSection = '';
+    if (grammarIssues.length > 0) {
+        grammarSection = grammarIssues.slice(0, 5).map(issue => `
+            <div class="grammar-issue ${issue.type}">
+                <span class="issue-icon">${issue.type === 'error' ? '❌' : '⚠️'}</span>
+                <span class="issue-text">"${issue.word}" - ${issue.message}</span>
+            </div>
+        `).join('');
+    }
+    
+    // Build script comparison
+    let comparisonSection = '';
+    if (comparison) {
+        const accuracy = comparison.total > 0 
+            ? Math.round((comparison.correct / comparison.total) * 100) 
+            : 0;
+        comparisonSection = `
+            <div class="comparison-stats">
+                <div class="stat"><span class="value">${accuracy}%</span><span class="label">Accuracy</span></div>
+                <div class="stat"><span class="value">${comparison.correct}</span><span class="label">Correct</span></div>
+                <div class="stat"><span class="value">${comparison.missed}</span><span class="label">Missed</span></div>
+                <div class="stat"><span class="value">${comparison.added}</span><span class="label">Added</span></div>
+            </div>
+        `;
+    }
+    
+    // Build pause analysis
+    const pauseCount = pauseHistory.length;
+    const avgPause = pauseCount > 0 
+        ? (pauseHistory.reduce((a, b) => a + b, 0) / pauseCount).toFixed(1)
+        : '--';
+    const dramaticPauses = pauseHistory.filter(p => p > 1.5).length;
+    
+    // Render the comprehensive report
     reportEl.innerHTML = `
         <div class="report-section">
             <h4>🎯 Overall Assessment</h4>
@@ -2407,6 +2476,39 @@ async function generateDirectorAnalysis(session) {
             <ul>
                 ${analysis.improvements.map(i => `<li>${i}</li>`).join('')}
             </ul>
+        </div>
+        
+        ${comparison ? `
+        <div class="report-section detailed-section">
+            <h4>📊 Script Comparison</h4>
+            ${comparisonSection}
+        </div>
+        ` : ''}
+        
+        <div class="report-section detailed-section">
+            <h4>📈 Filler Words Analysis</h4>
+            <div class="filler-stats">
+                <span class="filler-count">${totalFillers} filler words</span>
+                <span class="filler-rate">(${fillerRate}% of speech)</span>
+            </div>
+            ${fillerBreakdown ? `<div class="filler-breakdown">${fillerBreakdown}</div>` : '<p class="no-data">No filler words detected - excellent!</p>'}
+        </div>
+        
+        ${grammarIssues.length > 0 ? `
+        <div class="report-section detailed-section">
+            <h4>✍️ Grammar Notes</h4>
+            <p class="grammar-count">${grammarIssues.length} potential issue${grammarIssues.length !== 1 ? 's' : ''} detected</p>
+            ${grammarSection}
+        </div>
+        ` : ''}
+        
+        <div class="report-section detailed-section">
+            <h4>⏸️ Pause Analysis</h4>
+            <div class="pause-stats">
+                <div class="pause-stat"><span class="value">${pauseCount}</span><span class="label">Total Pauses</span></div>
+                <div class="pause-stat"><span class="value">${avgPause}s</span><span class="label">Avg Duration</span></div>
+                <div class="pause-stat"><span class="value">${dramaticPauses}</span><span class="label">Dramatic Pauses</span></div>
+            </div>
         </div>
         
         <div class="report-section">
