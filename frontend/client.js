@@ -2338,6 +2338,9 @@ async function openSessionDetail(sessionId) {
             `).join('');
     }
     
+    // Populate comprehensive metrics
+    populateSessionMetrics(session);
+    
     // Session notes
     const notesList = document.getElementById('sessionNotesList');
     if (session.notes && session.notes.length > 0) {
@@ -2367,6 +2370,104 @@ async function openSessionDetail(sessionId) {
     
     // Show modal
     modal.classList.remove('hidden');
+}
+
+// Populate comprehensive session metrics
+function populateSessionMetrics(session) {
+    const scores = session.finalScores || {};
+    const eyeContactData = session.eyeContactData || {};
+    const metricsHistory = session.metricsHistory || [];
+    const directorData = session.directorAnalysisData || {};
+    
+    // Get last metrics snapshot for detailed values
+    const lastMetrics = metricsHistory.length > 0 
+        ? metricsHistory[metricsHistory.length - 1] 
+        : null;
+    
+    // Helper function to set metric bar and value
+    function setMetric(id, value, displayValue) {
+        const barEl = document.getElementById(id + 'Bar');
+        const valueEl = document.getElementById(id);
+        if (barEl) barEl.style.width = Math.min(100, Math.max(0, value)) + '%';
+        if (valueEl) valueEl.textContent = displayValue || Math.round(value);
+    }
+    
+    // Delivery metrics
+    const pace = (scores.pace || 0.5) * 100;
+    setMetric('detailPace', pace, Math.round(pace) + '%');
+    
+    const pauses = (scores.stability || 0.5) * 100;
+    setMetric('detailPauses', pauses, Math.round(pauses) + '%');
+    
+    // Vocal metrics
+    const energy = (scores.energy || 0.5) * 100;
+    setMetric('detailEnergy', energy, Math.round(energy) + '%');
+    
+    const variety = (scores.pitch_variety || 0.5) * 100;
+    setMetric('detailVariety', variety, Math.round(variety) + '%');
+    
+    // Presence metrics
+    const eyeContact = (scores.eye_contact || 0.5) * 100;
+    setMetric('detailEyeContact', eyeContact, Math.round(eyeContact) + '%');
+    
+    const presence = (scores.presence || 0.5) * 100;
+    setMetric('detailCommand', presence, Math.round(presence) + '%');
+    
+    // Technique metrics
+    const fillers = (scores.filler_words || 0.5) * 100;
+    setMetric('detailFillers', fillers, Math.round(fillers) + '%');
+    
+    const stability = (scores.stability || 0.5) * 100;
+    setMetric('detailStability', stability, Math.round(stability) + '%');
+    
+    // Emotional read
+    const voiceEmotionEl = document.getElementById('detailVoiceEmotion');
+    const faceEmotionEl = document.getElementById('detailFaceEmotion');
+    const intensityEl = document.getElementById('detailIntensity');
+    const eyeContactPctEl = document.getElementById('detailEyeContactPct');
+    
+    // Try to get emotion from metrics history or directorData
+    if (directorData.emotionalHistory && directorData.emotionalHistory.length > 0) {
+        const lastEmotion = directorData.emotionalHistory[directorData.emotionalHistory.length - 1];
+        if (voiceEmotionEl) voiceEmotionEl.textContent = getEmotionDisplay(lastEmotion.voice || 'neutral');
+        if (faceEmotionEl) faceEmotionEl.textContent = getEmotionDisplay(lastEmotion.face || 'neutral');
+    } else {
+        if (voiceEmotionEl) voiceEmotionEl.textContent = '😐 neutral';
+        if (faceEmotionEl) faceEmotionEl.textContent = '😐 neutral';
+    }
+    
+    // Intensity
+    if (intensityEl) {
+        if (energy >= 80) {
+            intensityEl.textContent = 'High';
+        } else if (energy >= 60) {
+            intensityEl.textContent = 'Heightened';
+        } else if (energy >= 40) {
+            intensityEl.textContent = 'Moderate';
+        } else {
+            intensityEl.textContent = 'Low';
+        }
+    }
+    
+    // Eye contact percentage
+    if (eyeContactPctEl) {
+        const pct = eyeContactData.percentage || Math.round(eyeContact);
+        eyeContactPctEl.textContent = Math.round(pct) + '%';
+    }
+}
+
+// Get emoji display for emotion
+function getEmotionDisplay(emotion) {
+    const emojis = {
+        'neutral': '😐 neutral',
+        'happy': '😊 happy',
+        'sad': '😢 sad',
+        'angry': '😠 angry',
+        'fearful': '😨 fearful',
+        'surprised': '😮 surprised',
+        'disgusted': '🤢 disgusted'
+    };
+    return emojis[emotion?.toLowerCase()] || '😐 neutral';
 }
 
 // Render timeline markers

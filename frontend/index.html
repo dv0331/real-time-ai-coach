@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎭 Scivora - Perfect Every Performance</title>
-    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <link rel="stylesheet" href="/static/styles.css?v=6">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -1066,6 +1066,119 @@ SARAH: Then what did you mean?"></textarea>
                                 </div>
                             </div>
                             
+                            <!-- Comprehensive Performance Metrics -->
+                            <div class="analysis-card performance-metrics-card">
+                                <h3>📊 Performance Metrics</h3>
+                                <div class="metrics-dashboard" id="sessionMetricsDashboard">
+                                    <!-- Delivery -->
+                                    <div class="metric-category">
+                                        <div class="category-header">
+                                            <span class="category-icon">🗣️</span>
+                                            <span class="category-name">Delivery</span>
+                                        </div>
+                                        <div class="metric-row">
+                                            <span class="metric-label">Pace</span>
+                                            <div class="metric-bar-container"><div class="metric-bar-fill" id="detailPaceBar"></div></div>
+                                            <span class="metric-value" id="detailPace">--</span>
+                                        </div>
+                                        <div class="metric-row">
+                                            <span class="metric-label">Pauses</span>
+                                            <div class="metric-bar-container"><div class="metric-bar-fill" id="detailPausesBar"></div></div>
+                                            <span class="metric-value" id="detailPauses">--</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Vocal -->
+                                    <div class="metric-category">
+                                        <div class="category-header">
+                                            <span class="category-icon">🎵</span>
+                                            <span class="category-name">Vocal</span>
+                                        </div>
+                                        <div class="metric-row">
+                                            <span class="metric-label">Energy</span>
+                                            <div class="metric-bar-container"><div class="metric-bar-fill" id="detailEnergyBar"></div></div>
+                                            <span class="metric-value" id="detailEnergy">--</span>
+                                        </div>
+                                        <div class="metric-row">
+                                            <span class="metric-label">Variety</span>
+                                            <div class="metric-bar-container"><div class="metric-bar-fill" id="detailVarietyBar"></div></div>
+                                            <span class="metric-value" id="detailVariety">--</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Presence -->
+                                    <div class="metric-category">
+                                        <div class="category-header">
+                                            <span class="category-icon">✨</span>
+                                            <span class="category-name">Presence</span>
+                                        </div>
+                                        <div class="metric-row">
+                                            <span class="metric-label">Eye Contact</span>
+                                            <div class="metric-bar-container"><div class="metric-bar-fill" id="detailEyeContactBar"></div></div>
+                                            <span class="metric-value" id="detailEyeContact">--</span>
+                                        </div>
+                                        <div class="metric-row">
+                                            <span class="metric-label">Command</span>
+                                            <div class="metric-bar-container"><div class="metric-bar-fill" id="detailCommandBar"></div></div>
+                                            <span class="metric-value" id="detailCommand">--</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Technique -->
+                                    <div class="metric-category">
+                                        <div class="category-header">
+                                            <span class="category-icon">🎯</span>
+                                            <span class="category-name">Technique</span>
+                                        </div>
+                                        <div class="metric-row">
+                                            <span class="metric-label">Fillers</span>
+                                            <div class="metric-bar-container"><div class="metric-bar-fill" id="detailFillersBar"></div></div>
+                                            <span class="metric-value" id="detailFillers">--</span>
+                                        </div>
+                                        <div class="metric-row">
+                                            <span class="metric-label">Stability</span>
+                                            <div class="metric-bar-container"><div class="metric-bar-fill" id="detailStabilityBar"></div></div>
+                                            <span class="metric-value" id="detailStability">--</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Emotional Read -->
+                            <div class="analysis-card emotional-read-card">
+                                <h3>🎭 Emotional Read</h3>
+                                <div class="emotional-dashboard" id="sessionEmotionalDashboard">
+                                    <div class="emotion-item">
+                                        <div class="emotion-header">
+                                            <span class="emotion-icon">🎙️</span>
+                                            <span>Voice</span>
+                                        </div>
+                                        <span class="emotion-value" id="detailVoiceEmotion">😐 neutral</span>
+                                    </div>
+                                    <div class="emotion-item">
+                                        <div class="emotion-header">
+                                            <span class="emotion-icon">👤</span>
+                                            <span>Expression</span>
+                                        </div>
+                                        <span class="emotion-value" id="detailFaceEmotion">😐 neutral</span>
+                                    </div>
+                                    <div class="emotion-item">
+                                        <div class="emotion-header">
+                                            <span class="emotion-icon">⚡</span>
+                                            <span>Intensity</span>
+                                        </div>
+                                        <span class="emotion-value" id="detailIntensity">Moderate</span>
+                                    </div>
+                                    <div class="emotion-item">
+                                        <div class="emotion-header">
+                                            <span class="emotion-icon">👁️</span>
+                                            <span>Eye Contact %</span>
+                                        </div>
+                                        <span class="emotion-value" id="detailEyeContactPct">--%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <!-- AI Director's Report -->
                             <div class="analysis-card director-report">
                                 <h3>🎬 Director's Analysis</h3>
@@ -1490,6 +1603,6 @@ SARAH: Then what did you mean?"></textarea>
         </div>
     </div>
 
-    <script src="/static/client.js?v=12"></script>
+    <script src="/static/client.js?v=13"></script>
 </body>
 </html>
