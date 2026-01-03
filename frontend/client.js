@@ -4124,3 +4124,119 @@ startSession = async function() {
     resetAnalysis();
     await originalStartSession2.apply(this, arguments);
 };
+
+// ============================================================================
+// COACH SUBSCRIPTION & NOTIFY SYSTEM
+// ============================================================================
+
+let currentNotifyCoach = null;
+
+// Open notify modal
+function openNotifyModal(coachName, icon) {
+    currentNotifyCoach = coachName;
+    const modal = document.getElementById('notifyModal');
+    const iconEl = document.getElementById('notifyModalIcon');
+    const titleEl = document.getElementById('notifyModalTitle');
+    const descEl = document.getElementById('notifyModalDesc');
+    
+    if (!modal) return;
+    
+    // Set content based on coach
+    const coachNames = {
+        'interview': 'Interview Prep Coach',
+        'family': 'Family & Marriage Coach',
+        'life': 'Life Coach',
+        'presentation': 'Presentation Coach',
+        'yoga': 'Yoga Coach',
+        'martial': 'Martial Arts Coach',
+        'gym': 'Gym Coach',
+        'swim': 'Swim Coach',
+        'dance': 'Dance Coach',
+        'music': 'Music Coach'
+    };
+    
+    const coachIcons = {
+        'interview': '💼',
+        'family': '👨‍👩‍👧‍👦',
+        'life': '🌟',
+        'presentation': '📊',
+        'yoga': '🧘',
+        'martial': '🥋',
+        'gym': '🏋️',
+        'swim': '🏊',
+        'dance': '💃',
+        'music': '🎸'
+    };
+    
+    iconEl.textContent = coachIcons[coachName] || '🔔';
+    titleEl.textContent = `Get Notified: ${coachNames[coachName] || coachName}`;
+    descEl.textContent = `Be the first to know when the ${coachNames[coachName] || coachName} launches!`;
+    
+    modal.classList.remove('hidden');
+}
+
+// Close notify modal
+function closeNotifyModal() {
+    const modal = document.getElementById('notifyModal');
+    if (modal) modal.classList.add('hidden');
+    currentNotifyCoach = null;
+}
+
+// Submit notification request
+function submitNotify() {
+    const emailInput = document.getElementById('notifyEmail');
+    const email = emailInput?.value?.trim();
+    
+    if (!email || !email.includes('@')) {
+        alert('Please enter a valid email address');
+        return;
+    }
+    
+    // Store notification request
+    const notifications = JSON.parse(localStorage.getItem('coachNotifications') || '[]');
+    notifications.push({
+        coach: currentNotifyCoach,
+        email: email,
+        date: new Date().toISOString()
+    });
+    localStorage.setItem('coachNotifications', JSON.stringify(notifications));
+    
+    // Show success
+    const modal = document.getElementById('notifyModal');
+    if (modal) {
+        modal.querySelector('.notify-modal-content').innerHTML = `
+            <div class="notify-icon">✅</div>
+            <h3>You're on the list!</h3>
+            <p>We'll email you at <strong>${email}</strong> when this coach launches.</p>
+            <button class="btn btn-primary" onclick="closeNotifyModal()">Got it!</button>
+        `;
+    }
+    
+    console.log(`📧 Notification registered: ${email} for ${currentNotifyCoach}`);
+}
+
+// Initialize coach buttons
+function initCoachButtons() {
+    document.querySelectorAll('.btn-subscribe').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const coachCard = e.target.closest('.coach-card');
+            const coachName = coachCard?.dataset?.coach;
+            if (coachName) {
+                openNotifyModal(coachName);
+            }
+        });
+    });
+    
+    // Close modal on outside click
+    document.getElementById('notifyModal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'notifyModal') {
+            closeNotifyModal();
+        }
+    });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', initCoachButtons);
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(initCoachButtons, 100);
+}

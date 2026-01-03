@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎭 Scivora - Perfect Every Performance</title>
-    <link rel="stylesheet" href="/static/styles.css?v=3">
+    <link rel="stylesheet" href="/static/styles.css?v=4">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -897,97 +897,309 @@ SARAH: Then what did you mean?"></textarea>
         <!-- ================================================================ -->
         <main class="tab-content" id="tab-coaches">
             <div class="coaches-layout">
+                <!-- Hero Section with Value Proposition -->
                 <div class="coaches-hero">
-                    <h2>🏆 Choose Your Coach</h2>
-                    <p>The same powerful AI technology, tailored for different disciplines. Select a coach to get started.</p>
-                </div>
-                
-                <div class="coaches-grid">
-                    <!-- Swim Coach -->
-                    <div class="coach-card" data-coach="swim">
-                        <div class="coach-icon">🏊</div>
-                        <h3>Swim Coach</h3>
-                        <p>Analyze stroke technique, body position, and breathing patterns.</p>
-                        <div class="coach-features">
-                            <span class="feature">Stroke Analysis</span>
-                            <span class="feature">Lap Timing</span>
-                            <span class="feature">Form Feedback</span>
+                    <h2>🏆 Fix Your Life. Choose Your Coach.</h2>
+                    <p class="hero-tagline">The same powerful AI technology, tailored for different disciplines.</p>
+                    <div class="value-banner">
+                        <div class="value-icon">💰</div>
+                        <div class="value-content">
+                            <h4>Incredible Value</h4>
+                            <p>People usually pay <strong>$300 - $500 per session</strong> for professional coaching.</p>
+                            <p class="value-highlight">With Scivora, get <strong>UNLIMITED sessions</strong> for just <strong>$500/month</strong> per coach!</p>
                         </div>
-                        <button class="btn btn-primary btn-coach">Start Training</button>
-                    </div>
-                    
-                    <!-- Gym Coach -->
-                    <div class="coach-card" data-coach="gym">
-                        <div class="coach-icon">🏋️</div>
-                        <h3>Gym Coach</h3>
-                        <p>Real-time form correction for exercises and weightlifting.</p>
-                        <div class="coach-features">
-                            <span class="feature">Rep Counting</span>
-                            <span class="feature">Form Check</span>
-                            <span class="feature">Range of Motion</span>
-                        </div>
-                        <button class="btn btn-primary btn-coach">Start Training</button>
-                    </div>
-                    
-                    <!-- Dance Coach -->
-                    <div class="coach-card" data-coach="dance">
-                        <div class="coach-icon">💃</div>
-                        <h3>Dance Posture</h3>
-                        <p>Perfect your posture, alignment, and movement quality.</p>
-                        <div class="coach-features">
-                            <span class="feature">Posture Analysis</span>
-                            <span class="feature">Balance Check</span>
-                            <span class="feature">Movement Flow</span>
-                        </div>
-                        <button class="btn btn-primary btn-coach">Start Training</button>
-                    </div>
-                    
-                    <!-- Music Coach -->
-                    <div class="coach-card" data-coach="music">
-                        <div class="coach-icon">🎸</div>
-                        <h3>Music Coach</h3>
-                        <p>Improve your instrument technique and performance presence.</p>
-                        <div class="coach-features">
-                            <span class="feature">Posture Check</span>
-                            <span class="feature">Hand Position</span>
-                            <span class="feature">Stage Presence</span>
-                        </div>
-                        <button class="btn btn-primary btn-coach">Start Training</button>
-                    </div>
-                    
-                    <!-- Life Coach -->
-                    <div class="coach-card" data-coach="life">
-                        <div class="coach-icon">🧘</div>
-                        <h3>Life Coach</h3>
-                        <p>Communication skills, confidence, and personal presence.</p>
-                        <div class="coach-features">
-                            <span class="feature">Communication</span>
-                            <span class="feature">Confidence</span>
-                            <span class="feature">Body Language</span>
-                        </div>
-                        <button class="btn btn-primary btn-coach">Start Training</button>
-                    </div>
-                    
-                    <!-- Presentation Coach -->
-                    <div class="coach-card" data-coach="presentation">
-                        <div class="coach-icon">📊</div>
-                        <h3>Presentation</h3>
-                        <p>Master public speaking and business presentations.</p>
-                        <div class="coach-features">
-                            <span class="feature">Pacing</span>
-                            <span class="feature">Eye Contact</span>
-                            <span class="feature">Engagement</span>
-                        </div>
-                        <button class="btn btn-primary btn-coach">Start Training</button>
                     </div>
                 </div>
                 
-                <!-- Coming Soon Banner -->
-                <div class="coming-soon-banner">
-                    <span class="banner-icon">🚀</span>
+                <!-- Active Coach - Acting -->
+                <div class="coach-section">
+                    <h3 class="section-title">🎭 Currently Active</h3>
+                    <div class="coaches-grid">
+                        <div class="coach-card active" data-coach="acting">
+                            <div class="coach-badge active-badge">ACTIVE</div>
+                            <div class="coach-icon">🎭</div>
+                            <h3>Acting Coach</h3>
+                            <p>Real-time feedback on delivery, emotion, presence, and technique for actors.</p>
+                            <div class="coach-features">
+                                <span class="feature">Emotional Analysis</span>
+                                <span class="feature">Voice Coaching</span>
+                                <span class="feature">Script Practice</span>
+                                <span class="feature">Director Feedback</span>
+                            </div>
+                            <div class="coach-pricing">
+                                <span class="price-compare">Was: $400/session</span>
+                                <span class="price-now">$500<span class="price-period">/month</span></span>
+                                <span class="price-value">Unlimited Sessions</span>
+                            </div>
+                            <button class="btn btn-primary btn-coach" onclick="switchTab('realtime')">Start Training</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Life & Relationships Section -->
+                <div class="coach-section">
+                    <h3 class="section-title">💝 Life & Relationships</h3>
+                    <div class="coaches-grid">
+                        <!-- Interview Prep Coach -->
+                        <div class="coach-card coming-soon" data-coach="interview">
+                            <div class="coach-badge">COMING SOON</div>
+                            <div class="coach-icon">💼</div>
+                            <h3>Interview Prep Coach</h3>
+                            <p>Ace your job interviews with AI-powered feedback on answers, body language, and confidence.</p>
+                            <div class="coach-features">
+                                <span class="feature">Answer Analysis</span>
+                                <span class="feature">STAR Method</span>
+                                <span class="feature">Confidence Scoring</span>
+                                <span class="feature">Mock Interviews</span>
+                            </div>
+                            <div class="coach-pricing">
+                                <span class="price-compare">Usually: $300/session</span>
+                                <span class="price-now">$500<span class="price-period">/month</span></span>
+                                <span class="price-value">Unlimited Sessions</span>
+                            </div>
+                            <button class="btn btn-subscribe btn-coach" data-coach="interview">
+                                <span>🔔</span> Notify Me
+                            </button>
+                        </div>
+
+                        <!-- Family & Marriage Coach -->
+                        <div class="coach-card coming-soon" data-coach="family">
+                            <div class="coach-badge">COMING SOON</div>
+                            <div class="coach-icon">👨‍👩‍👧‍👦</div>
+                            <h3>Family & Marriage Coach</h3>
+                            <p>Improve communication, resolve conflicts, and strengthen relationships with AI guidance.</p>
+                            <div class="coach-features">
+                                <span class="feature">Communication Skills</span>
+                                <span class="feature">Conflict Resolution</span>
+                                <span class="feature">Active Listening</span>
+                                <span class="feature">Empathy Training</span>
+                            </div>
+                            <div class="coach-pricing">
+                                <span class="price-compare">Usually: $400/session</span>
+                                <span class="price-now">$500<span class="price-period">/month</span></span>
+                                <span class="price-value">Unlimited Sessions</span>
+                            </div>
+                            <button class="btn btn-subscribe btn-coach" data-coach="family">
+                                <span>🔔</span> Notify Me
+                            </button>
+                        </div>
+
+                        <!-- Life Coach -->
+                        <div class="coach-card coming-soon" data-coach="life">
+                            <div class="coach-badge">COMING SOON</div>
+                            <div class="coach-icon">🌟</div>
+                            <h3>Life Coach</h3>
+                            <p>Build confidence, set goals, and transform your life with personalized AI coaching.</p>
+                            <div class="coach-features">
+                                <span class="feature">Goal Setting</span>
+                                <span class="feature">Mindset Coaching</span>
+                                <span class="feature">Accountability</span>
+                                <span class="feature">Progress Tracking</span>
+                            </div>
+                            <div class="coach-pricing">
+                                <span class="price-compare">Usually: $350/session</span>
+                                <span class="price-now">$500<span class="price-period">/month</span></span>
+                                <span class="price-value">Unlimited Sessions</span>
+                            </div>
+                            <button class="btn btn-subscribe btn-coach" data-coach="life">
+                                <span>🔔</span> Notify Me
+                            </button>
+                        </div>
+
+                        <!-- Presentation Coach -->
+                        <div class="coach-card coming-soon" data-coach="presentation">
+                            <div class="coach-badge">COMING SOON</div>
+                            <div class="coach-icon">📊</div>
+                            <h3>Presentation Coach</h3>
+                            <p>Master public speaking, pitches, and business presentations with AI analysis.</p>
+                            <div class="coach-features">
+                                <span class="feature">Speech Pacing</span>
+                                <span class="feature">Slide Timing</span>
+                                <span class="feature">Audience Engagement</span>
+                                <span class="feature">Q&A Prep</span>
+                            </div>
+                            <div class="coach-pricing">
+                                <span class="price-compare">Usually: $500/session</span>
+                                <span class="price-now">$500<span class="price-period">/month</span></span>
+                                <span class="price-value">Unlimited Sessions</span>
+                            </div>
+                            <button class="btn btn-subscribe btn-coach" data-coach="presentation">
+                                <span>🔔</span> Notify Me
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fitness & Wellness Section -->
+                <div class="coach-section">
+                    <h3 class="section-title">💪 Fitness & Wellness</h3>
+                    <div class="coaches-grid">
+                        <!-- Yoga Coach -->
+                        <div class="coach-card coming-soon" data-coach="yoga">
+                            <div class="coach-badge">COMING SOON</div>
+                            <div class="coach-icon">🧘</div>
+                            <h3>Yoga Coach</h3>
+                            <p>Perfect your poses, alignment, and breathing with real-time AI feedback.</p>
+                            <div class="coach-features">
+                                <span class="feature">Pose Correction</span>
+                                <span class="feature">Alignment Check</span>
+                                <span class="feature">Breathing Guide</span>
+                                <span class="feature">Flow Sequences</span>
+                            </div>
+                            <div class="coach-pricing">
+                                <span class="price-compare">Usually: $150/session</span>
+                                <span class="price-now">$500<span class="price-period">/month</span></span>
+                                <span class="price-value">Unlimited Sessions</span>
+                            </div>
+                            <button class="btn btn-subscribe btn-coach" data-coach="yoga">
+                                <span>🔔</span> Notify Me
+                            </button>
+                        </div>
+
+                        <!-- Martial Arts Coach -->
+                        <div class="coach-card coming-soon" data-coach="martial">
+                            <div class="coach-badge">COMING SOON</div>
+                            <div class="coach-icon">🥋</div>
+                            <h3>Martial Arts Coach</h3>
+                            <p>Master technique, form, and movement patterns for any martial art style.</p>
+                            <div class="coach-features">
+                                <span class="feature">Form Analysis</span>
+                                <span class="feature">Strike Technique</span>
+                                <span class="feature">Stance Check</span>
+                                <span class="feature">Speed Training</span>
+                            </div>
+                            <div class="coach-pricing">
+                                <span class="price-compare">Usually: $200/session</span>
+                                <span class="price-now">$500<span class="price-period">/month</span></span>
+                                <span class="price-value">Unlimited Sessions</span>
+                            </div>
+                            <button class="btn btn-subscribe btn-coach" data-coach="martial">
+                                <span>🔔</span> Notify Me
+                            </button>
+                        </div>
+
+                        <!-- Gym Coach -->
+                        <div class="coach-card coming-soon" data-coach="gym">
+                            <div class="coach-badge">COMING SOON</div>
+                            <div class="coach-icon">🏋️</div>
+                            <h3>Gym Coach</h3>
+                            <p>Real-time form correction for exercises, weightlifting, and strength training.</p>
+                            <div class="coach-features">
+                                <span class="feature">Rep Counting</span>
+                                <span class="feature">Form Check</span>
+                                <span class="feature">Range of Motion</span>
+                                <span class="feature">Workout Plans</span>
+                            </div>
+                            <div class="coach-pricing">
+                                <span class="price-compare">Usually: $100/session</span>
+                                <span class="price-now">$500<span class="price-period">/month</span></span>
+                                <span class="price-value">Unlimited Sessions</span>
+                            </div>
+                            <button class="btn btn-subscribe btn-coach" data-coach="gym">
+                                <span>🔔</span> Notify Me
+                            </button>
+                        </div>
+
+                        <!-- Swim Coach -->
+                        <div class="coach-card coming-soon" data-coach="swim">
+                            <div class="coach-badge">COMING SOON</div>
+                            <div class="coach-icon">🏊</div>
+                            <h3>Swim Coach</h3>
+                            <p>Analyze stroke technique, body position, and breathing patterns in the water.</p>
+                            <div class="coach-features">
+                                <span class="feature">Stroke Analysis</span>
+                                <span class="feature">Lap Timing</span>
+                                <span class="feature">Form Feedback</span>
+                                <span class="feature">Endurance Tips</span>
+                            </div>
+                            <div class="coach-pricing">
+                                <span class="price-compare">Usually: $150/session</span>
+                                <span class="price-now">$500<span class="price-period">/month</span></span>
+                                <span class="price-value">Unlimited Sessions</span>
+                            </div>
+                            <button class="btn btn-subscribe btn-coach" data-coach="swim">
+                                <span>🔔</span> Notify Me
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Creative & Performance Section -->
+                <div class="coach-section">
+                    <h3 class="section-title">🎨 Creative & Performance</h3>
+                    <div class="coaches-grid">
+                        <!-- Dance Coach -->
+                        <div class="coach-card coming-soon" data-coach="dance">
+                            <div class="coach-badge">COMING SOON</div>
+                            <div class="coach-icon">💃</div>
+                            <h3>Dance Coach</h3>
+                            <p>Perfect your posture, alignment, rhythm, and movement quality for any dance style.</p>
+                            <div class="coach-features">
+                                <span class="feature">Posture Analysis</span>
+                                <span class="feature">Rhythm Tracking</span>
+                                <span class="feature">Movement Flow</span>
+                                <span class="feature">Choreography</span>
+                            </div>
+                            <div class="coach-pricing">
+                                <span class="price-compare">Usually: $200/session</span>
+                                <span class="price-now">$500<span class="price-period">/month</span></span>
+                                <span class="price-value">Unlimited Sessions</span>
+                            </div>
+                            <button class="btn btn-subscribe btn-coach" data-coach="dance">
+                                <span>🔔</span> Notify Me
+                            </button>
+                        </div>
+
+                        <!-- Music Coach -->
+                        <div class="coach-card coming-soon" data-coach="music">
+                            <div class="coach-badge">COMING SOON</div>
+                            <div class="coach-icon">🎸</div>
+                            <h3>Music Coach</h3>
+                            <p>Improve your instrument technique, posture, and performance presence.</p>
+                            <div class="coach-features">
+                                <span class="feature">Posture Check</span>
+                                <span class="feature">Hand Position</span>
+                                <span class="feature">Stage Presence</span>
+                                <span class="feature">Practice Plans</span>
+                            </div>
+                            <div class="coach-pricing">
+                                <span class="price-compare">Usually: $150/session</span>
+                                <span class="price-now">$500<span class="price-period">/month</span></span>
+                                <span class="price-value">Unlimited Sessions</span>
+                            </div>
+                            <button class="btn btn-subscribe btn-coach" data-coach="music">
+                                <span>🔔</span> Notify Me
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subscribe All Banner -->
+                <div class="subscribe-all-banner">
+                    <div class="banner-glow"></div>
                     <div class="banner-content">
-                        <h4>More Coaches Coming Soon!</h4>
-                        <p>Yoga, Martial Arts, Interview Prep, and more...</p>
+                        <h3>🌟 Get All Coaches - One Subscription</h3>
+                        <p>Access every coach, every feature, unlimited sessions</p>
+                        <div class="all-access-pricing">
+                            <span class="all-price">$1,999<span>/month</span></span>
+                            <span class="all-savings">Save $4,000+ compared to individual subscriptions</span>
+                        </div>
+                        <button class="btn btn-subscribe-all">
+                            <span>✨</span> Subscribe to All - Coming Soon
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notify Modal -->
+                <div class="notify-modal hidden" id="notifyModal">
+                    <div class="notify-modal-content">
+                        <button class="notify-close" onclick="closeNotifyModal()">&times;</button>
+                        <div class="notify-icon" id="notifyModalIcon">🔔</div>
+                        <h3 id="notifyModalTitle">Get Notified</h3>
+                        <p id="notifyModalDesc">Be the first to know when this coach launches!</p>
+                        <input type="email" id="notifyEmail" placeholder="Enter your email" class="notify-input">
+                        <button class="btn btn-primary" onclick="submitNotify()">Notify Me</button>
+                        <p class="notify-note">We'll never spam. Just one email when it's ready!</p>
                     </div>
                 </div>
             </div>
@@ -1061,6 +1273,6 @@ SARAH: Then what did you mean?"></textarea>
         </div>
     </div>
 
-    <script src="/static/client.js?v=7"></script>
+    <script src="/static/client.js?v=8"></script>
 </body>
 </html>
